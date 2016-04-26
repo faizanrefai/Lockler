@@ -1,0 +1,61 @@
+//
+//  MineFunnVC.h
+//  EstateLokaler
+//
+//  Created by apple on 9/7/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import <MapKit/MapKit.h>
+
+@class EstateLokalerAppDelegate;
+@class MineSokCell;
+@class EGOImageView;
+@class REVClusterMapView;
+@class REVClusterPin;
+@class REVClusterAnnotationView;
+
+
+@interface MineFunnVC : UIViewController <UITableViewDelegate,UITableViewDataSource,MKMapViewDelegate>{
+	EstateLokalerAppDelegate *appdel;
+	
+	NSMutableDictionary *_dict;
+	
+	IBOutlet UITableView *tableView;
+	IBOutlet UIImageView *img;
+	IBOutlet UIView *mapView;
+	IBOutlet UIView *listView;
+	IBOutlet MKMapView *mapObj; 
+	IBOutlet UIButton *btnBack;
+	IBOutlet UIButton *btnDelete;
+	
+	NSMutableArray *arrDel;
+	NSMutableArray *arrDelID;
+	NSMutableArray *arrLat;
+	NSMutableArray *arrLong;
+	NSMutableArray *dist;
+	NSMutableArray *arrSok;
+	
+	NSMutableDictionary *d;
+	NSMutableDictionary *dictSok;
+	NSString *strAddress;
+	NSString *strTmp;
+	NSURL *imgURL;
+	
+	NSString *strTempDelID;
+	REVClusterMapView *_mapView;
+	
+}
+
+-(IBAction)clickKart;
+-(IBAction)clickList;
+-(IBAction)clickBack;
+-(IBAction)funnDelete;
+-(void)GDATASokDetail;
+
+-(void)GDATA;
+-(void)GDATADelete;
+-(void)getMapannotation: (NSMutableArray *)arr;
+-(void)setLoadImageg:(NSString*)loadimage:(EGOImageView*)img;
+@end

@@ -1,0 +1,1142 @@
+//
+//  PropertiesDetailVC.m
+//  EstateLokaler
+//
+//  Created by apple on 9/6/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import "PropertiesDetailVC.h"
+#import "GTHeaderView.h"
+#import "HeadlinesCellController.h"
+#import "GdataParser.h"
+#import "EstateLokalerAppDelegate.h"
+#import "CurrentLocationMap.h"
+#import "SHKItem.h"
+#import "SHKFacebook.h"
+#import "SHKMail.h"
+#import "ArticleVC.h"
+#import	"EGOImageView.h"
+#import "ZoomViewController.h"
+#import "UITableViewCell+NIB.h"
+#import "detailCell.h"
+#import "Facility.h"
+#import "ArticleVCCell.h"
+#import "ArticleDetail.h"
+
+GTHeaderView *hView;
+
+@implementation PropertiesDetailVC
+@synthesize lblDepartmentName,lblAreaName,lblAreaIs,lblDistance,titleLable,
+detail,faci,head,art,btnMail,btnCall;
+
+
+//@synthesize strDepartmentName,strAreaName,strAreaIs,strDistance;	
+//@synthesize _dict,array,strCurrentID,tmp_dict;
+//@synthesize strURL;
+//@synthesize strLatitude,strLongitude;
+//@synthesize swipeLeftRecognizer,image,imageViewL;
+
+const CGFloat kScrollObjHeight	= 199.0;
+const CGFloat kScrollObjWidth	= 304.0;
+//const NSUInteger kNumImages		= 5;
+
+-(void)generateHeaderViews{
+	arrAddHeader = [[NSMutableArray alloc]init];
+	for(int i=0;i<[arrHeader count];i++)
+	{
+		hView = [GTHeaderView headerViewWithTitle:[arrHeader objectAtIndex:i] section:i Expanded:@"NO"];
+		[hView.button addTarget:self action:@selector(toggleSectionForSection:) forControlEvents:UIControlEventTouchUpInside];
+		[arrAddHeader addObject:hView];
+	}
+}
+
+// The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
+/*
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization.
+    }
+    return 
+ ;
+}
+*/
+
+
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+- (void)viewDidLoad {
+    [super viewDidLoad];
+	
+	
+	recognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
+	[self.view addGestureRecognizer:recognizer];
+	[recognizer release];
+	
+	//NSLog(@"%@  %@",strLatitude,strLongitude);
+	
+	arrHeader = [[NSArray alloc]initWithObjects:@"Beskrivelse av lokalene",@"Fasiliteter",@"Kontakt utleier",@"Områdeinfo",nil];
+	[self generateHeaderViews];
+	[viewAlert setFrame:CGRectMake(19, 470, 285, 185)];
+	appdel=(EstateLokalerAppDelegate *)[[UIApplication sharedApplication] delegate];
+	appdel.flagDetailVC=1;
+	arrContact=[[NSMutableArray alloc]init];
+	array=[[NSMutableArray alloc]init];
+	arrDesUrl=[[NSMutableArray alloc]init];
+	strURL=[[NSMutableString alloc]init];
+	arrSecondaryImg=[[NSMutableArray alloc]init];
+	strDepartmentName=[[NSString alloc]init];
+	strAreaName=[[NSString alloc]init];
+	strAreaIs=[[NSString alloc]init];
+	strDistance=[[NSString alloc]init];
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+	[viewAlert setFrame:CGRectMake(19, 100, 285, 185)];
+	flagForNoData=0;
+	flag0=0;
+	flag1=0;
+	flag2=0;
+	flag3=0;
+	flagSecDetail=0;
+		arrSplitFacility=[[NSMutableArray alloc]init];
+	viewAlert.hidden =YES;
+    [self GDATA];
+}
+
+- (void) animateTextField:(BOOL) up
+{
+    const int movementDistance = 300; // tweak as needed
+    const float movementDuration = 0.3f; // tweak as needed
+    
+    int movement = (up ? -movementDistance : movementDistance);
+    
+    [UIView beginAnimations: @"anim" context: nil];
+    [UIView setAnimationBeginsFromCurrentState: YES];
+    [UIView setAnimationDuration: movementDuration];
+    self.view.frame = CGRectOffset(self.view.frame, 0, movement);
+    [UIView commitAnimations];
+}
+
+-(void)setData:(NSMutableDictionary*)dt{
+	//NSLog(@"dt is: %@",dt);
+}
+
+- (void)layoutScrollImages{
+	
+	UIImageView *view = nil;
+	NSArray *subviews = [scrollView1 subviews];
+	
+	// reposition all image subviews in a horizontal serial fashion
+	CGFloat curXLoc = 0;
+	for (view in subviews)
+	{
+		if ([view isKindOfClass:[UIImageView class]] && view.tag >0)
+		{ 
+			CGRect frame = view.frame;
+			frame.origin = CGPointMake(curXLoc, 0);
+			view.frame = frame;
+			curXLoc += (kScrollObjWidth);
+		}
+	}
+	
+	// set the content size so it can be scrollable
+	[scrollView1 setContentSize:CGSizeMake(([arrSecondaryImg count] * kScrollObjWidth), [scrollView1 bounds].size.height)];
+}
+
+-(void)setLoadImageg:(NSString*)loadimage:(EGOImageView*)img{
+	//NSLog(@"%@",loadimage);
+	//[NSURL URLWithString:[[loadimage stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+	 img.imageURL =[NSURL URLWithString:[loadimage stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+	
+}
+
+-(void)scrollViewDidScroll:(UIScrollView *)scrollView{
+	if(scrollView ==MainScroll){
+		
+	}
+	else{
+	//NSLog(@"%@",scrollView1);
+	imageCnt =scrollView1.contentOffset.x/307;
+	
+	NSString *str=[NSString stringWithFormat:@"%d/%d bilder",imageCnt+1,[arrSecondaryImg count]];
+	lblImgCnt.text=str;
+								}
+}
+-(void)scroll{
+	
+	//self.view.backgroundColor = [UIColor viewFlipsideBackgroundColor];
+	
+	//[scrollView1 setBackgroundColor:[UIColor blackColor]];
+	[scrollView1 setCanCancelContentTouches:NO];
+	scrollView1.indicatorStyle = UIScrollViewIndicatorStyleWhite;
+	scrollView1.clipsToBounds = YES;		
+	scrollView1.scrollEnabled = YES;
+	
+	scrollView1.pagingEnabled = YES;
+	
+	NSUInteger i;
+	UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, 304.0f, 199.0f)];
+	
+	for (i = 1; i <=[arrSecondaryImg count]; i++)
+	{
+		
+			NSString *imageName = [NSString stringWithFormat:@"%@",[arrSecondaryImg objectAtIndex:(i-1)]];
+			imageViewL = [[EGOImageView alloc] initWithPlaceholderImage:[UIImage imageNamed:@""]];
+			[self setLoadImageg:imageName:imageViewL];
+			
+			imageViewL.frame = CGRectMake(0.0f, 0.0f, 304.0f, 199.0f);
+		
+			CGRect rect = imageViewL.frame;
+					
+			rect.size.height = kScrollObjHeight;
+			rect.size.width = kScrollObjWidth;
+			imageViewL.frame = rect;
+			imageViewL.tag = i;	// tag our images for later use when we place them in serial fashion
+			[view addSubview:imageViewL];
+			
+			[scrollView1 addSubview:imageViewL];
+	}
+	
+	UIPinchGestureRecognizer *pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
+	[view addGestureRecognizer:pinchGesture];
+	[pinchGesture release];
+	imageCnt=0;
+	[self layoutScrollImages];
+	
+		
+}
+-(void)handlePinch:(UIPinchGestureRecognizer*)sender {
+	//addcnt++;
+	if(appdel.addcnt==0)
+	{
+	//NSLog(@"view added %d",addcnt);
+	UIImageView *view = nil;
+	NSArray *subviews = [scrollView1 subviews];
+	view =[subviews objectAtIndex:imageCnt];
+	appdel.addcnt=1;
+	ZoomViewController *obj =[[ZoomViewController alloc]initWithNibName:@"ZoomViewController" bundle:nil];
+	obj.myImage =view.image;
+	[self.view addSubview:obj.view];
+	}
+	
+}
+- (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView {
+	return image;
+}
+
+- (BOOL)touchesShouldBegin:(NSSet *)touches withEvent:(UIEvent *)event inContentView:(UIView *)vie   // default returns YES
+{
+    return YES;
+}
+
+- (void)handleSwipeFrom:(UISwipeGestureRecognizer *)recognizer 
+{
+    //NSLog(@"Swap image ");
+}
+
+-(void)GDATA{	
+	//NSLog(@"GDAT ID%@",appdel.appdelStrID);
+	GdataParser *parser = [[GdataParser alloc] init];
+	[parser setLoading:TRUE];
+	[parser downloadAndParse:[NSURL  URLWithString:[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=propertydetails&prId=%@",appdel.appdelStrID]]
+	
+				 withRootTag:@"post" 
+					withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"id",@"id",@"adress",@"adress",
+							  @"houseno",@"houseno",@"area",@"area",@"town",@"town",@"deartmentname",@"deartmentname",
+							  @"from_area",@"from_area",@"to_area",@"to_area",@"mainimage",@"mainimage",
+							  @"title",@"title",@"shortDescription",@"shortDescription",
+							  @"descriptionurl",@"descriptionurl",@"desclen",@"desclen",@"latitude",@"latitude",
+							  @"longitude",@"longitude",@"companyname",@"companyname",@"companylogo",@"companylogo",
+					 		  @"priAgentname",@"priAgentname",@"priphone",@"priphone",@"pricell",@"pricell",@"prifax",@"prifax",
+							  @"priAgentEmail",@"priAgentEmail",@"secAgentname",@"secAgentname",@"secphone",@"secphone",@"seccell",@"seccell",
+							  @"secfax",@"secfax",@"secAgentEmail",@"secAgentEmail",@"weblink",@"weblink",@"facilities",
+							  @"facilities",@"secondary_images",@"secondary_images",nil]
+							  sel:@selector(finishGetData:) 
+							  andHandler:self];
+}
+
+-(void)finishGetData:(NSDictionary*)dictionary{
+	//NSLog(@"This is dictionary: %@",dictionary);
+	//[array removeAllObjects];
+	array = [dictionary valueForKey:@"array"];
+	_dict =[dictionary valueForKey:@"array"];
+	if ([array count]==0) {
+		//NSLog(@"Exit:::");
+		flagForNoData=1;
+		[viewSokAlert setFrame:CGRectMake(19, 140, 285, 185)];
+
+		return;
+	}
+	
+	
+	
+	strLatitude= [[array objectAtIndex:0] valueForKey:@"latitude"];
+	strLongitude=[[array objectAtIndex:0] valueForKey:@"longitude"];
+		
+	
+	if((appdel.isDetail))
+	{
+		CLLocation *poiLoc = [[CLLocation alloc] initWithLatitude: [strLatitude doubleValue] longitude: [strLongitude doubleValue]];
+		
+		//NSLog(@"%f  %f",appdel.lat,appdel.lon);
+		
+		CLLocation *userLoc = [[CLLocation alloc] initWithLatitude:appdel.lat longitude:appdel.lon];
+		
+		double dist1 = [userLoc getDistanceFrom:poiLoc];
+		
+		NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+		[formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+		[formatter setMaximumFractionDigits:2];
+		[formatter setRoundingMode: NSNumberFormatterRoundHalfUp];
+		
+		NSString *numberString = [formatter stringFromNumber:[NSNumber numberWithFloat:dist1]];
+		
+		[formatter release];
+		//NSLog(@"%@",numberString);
+		
+		if(dist1<999)
+			appdel.strDistance=[NSString stringWithFormat:@"%@ meter",numberString];
+		else{
+			
+			float temp;
+			temp=dist1/1000;
+			appdel.strDistance=[NSString stringWithFormat:@"%.2f KM",temp];
+			
+		}
+		//double dist = 
+		//[self getDistance:appdel.lat:appdel.lon:[strlat doubleValue]:[strlong doubleValue]];
+		
+	} 
+	
+	_dict =[dictionary valueForKey:@"array"];
+	array=[dictionary valueForKey:@"array"];
+	
+	NSString *str;
+	str=[[array objectAtIndex:0] valueForKey:@"facilities"];
+	//NSLog(@"str::%@",str);
+	
+	arrSplitFacility=[[str componentsSeparatedByString:@"^"]retain];
+	NSString *strTmp;
+	strTmp=[NSString stringWithFormat:@"%@",[[array objectAtIndex:0]  valueForKey:@"secAgentname"]];
+	NSLog(@"strr::::%@",strTmp);
+	if (![strTmp isEqualToString:@""]) {
+		flagSecDetail=1;
+	}
+	
+	strDepartmentName=[[array objectAtIndex:0] valueForKey:@"deartmentname"];
+	//strDepartmentName=[NSString stringWithFormat:@"%@", [strDepartmentName objectAtIndex:0]];
+	//NSLog(@"dept::%@",strDepartmentName);
+	strAreaName=[[array objectAtIndex:0] valueForKey:@"area"];
+	//strAreaName=[NSString stringWithFormat:@"%@", [strAreaName objectAtIndex:0]];
+	//NSLog(@"strAreaName::%@",strAreaName);
+	NSString *strArea1;
+	NSString *strArea2;
+	strArea1=[[array objectAtIndex:0] valueForKey:@"from_area"];
+	//strArea1=[NSString stringWithFormat:@"%@",[strArea1 objectAtIndex:0]];
+	strArea2=[[array objectAtIndex:0] valueForKey:@"to_area"];
+	
+	strAreaIs=[NSString stringWithFormat:@"%@-%@ kvm", strArea1,strArea2];
+		
+	arrContact=[[array objectAtIndex:0] valueForKey:@"array"];	
+	arrDesUrl=[[array objectAtIndex:0] valueForKey:@"descriptionurl"];
+		
+	appdel.strTitleMap=[[array objectAtIndex:0] valueForKey:@"title"];
+	strSecondaryImg=[_dict valueForKey:@"secondary_images"];
+	
+	strSecondaryImg=[NSString stringWithFormat:@"%@", [strSecondaryImg objectAtIndex:0]];
+	
+	lblDepartmentName.text=strDepartmentName;
+	lblAreaName.text=strAreaName;
+	lblAreaIs.text=strAreaIs;
+	lblDistance.text=appdel.strDistance;
+	NSString *strAdd;
+	NSString *strNo;
+	strAdd=[[array objectAtIndex:0] valueForKey:@"adress"];
+	//strAdd=[NSString stringWithFormat:@"%@",[strAdd objectAtIndex:0]];
+	
+	strNo=[[array objectAtIndex:0] valueForKey:@"houseno"];
+	//strNo=[NSString stringWithFormat:@"%@",[strNo objectAtIndex:0]];
+	
+	strHouseAddress=[NSString stringWithFormat:@"%@, %@",strAdd,strNo];
+	
+	titleLable.text=strHouseAddress;
+	
+	lblAlertTitle.text=[NSString stringWithFormat:@"%@, %@ lagret", strAdd,strNo];
+	
+	appdel.strAppLat=strLatitude;
+	appdel.strAppLong=strLongitude;
+	
+	arrSecondaryImg=[[strSecondaryImg componentsSeparatedByString:@"^"]retain];
+	lblImgCnt.text=[NSString stringWithFormat:@"1/%d bilder",[arrSecondaryImg count]];
+	//[strAdd release];
+//	[strNo release];
+//	[strArea1 release];
+//	[strArea2 release];
+	
+	[self scroll];
+	[self GDATAArt];
+}
+
+-(void)GDATASave{	
+	//NSLog(@"strid is %@",appdel.appdelStrID);
+	GdataParser *parser1 = [[GdataParser alloc] init];
+	[parser1 downloadAndParse:[NSURL  URLWithString:[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=savemyad&udid=%@&propid=%@",appdel.udID,appdel.appdelStrID]]
+				 withRootTag:@"savemyad" 
+				withTags:[NSDictionary dictionaryWithObjectsAndKeys:nil]
+				sel:@selector(finishGetDataSave:) 
+				andHandler:self];
+}
+-(void)finishGetDataSave:(NSDictionary*)dictionary{
+	
+	array1 =[dictionary valueForKey:@"array"];
+}
+-(void)GDATAArt{	
+	
+	//NSLog(@"%@   %@",appdel.strAppLat,appdel.strAppLong);
+	GdataParser *parser2 = [[GdataParser alloc] init];
+	[parser2 downloadAndParse:[NSURL  URLWithString:[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=areaarticles&lat=%@&lon=%@",appdel.strAppLat,appdel.strAppLong]]
+				  withRootTag:@"post" 
+					 withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"catid",@"catid",@"id",@"id",@"title",@"title",@"introText",@"introText",@"categoryname",@"categoryname",nil]
+						  sel:@selector(finishGetDataArt:) 
+				   andHandler:self];
+}
+-(void)finishGetDataArt:(NSDictionary*)dictionary{
+	//NSLog(@"This is dictionary: %@",dictionary);
+	//[arrArtList removeAllObjects];
+	//[arrArtID removeAllObjects];
+	//[dict removeAllObjects];
+	arrArtList =[dictionary valueForKey:@"array"];
+	arrArtID=[dictionary valueForKey:@"id"];
+	cntArt=[arrArtList count];
+	//NSLog(@"%d",cntArt);
+	dict=[dictionary valueForKey:@"array"];
+	//NSLog(@"dict   %@",dict);
+	
+	
+	}
+
+
+
+-(void)GDATASaveSok{	
+
+	GdataParser *parser3 = [[GdataParser alloc] init];
+	[parser3 downloadAndParse:[NSURL  URLWithString:[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=savemyad&udid=%@&propid=%@",appdel.udID,appdel.appdelStrID]]
+				  withRootTag:@"savemyad" 
+					 withTags:[NSDictionary dictionaryWithObjectsAndKeys:nil]
+						  sel:@selector(finishGetDataSaveSok:) 
+				   andHandler:self];
+}
+
+-(void)finishGetDataSaveSok:(NSDictionary*)dictionary{
+	array1 =[dictionary valueForKey:@"array"];
+}
+
+
+
+#pragma mark -
+#pragma mark Table view data source
+
+-(IBAction)ShowMap{
+	if(flagForNoData==1)
+	{
+		[viewSokAlert setFrame:CGRectMake(19, 140, 285, 185)]; 
+	}
+	else {
+		
+	CurrentLocationMap *objMap=[[CurrentLocationMap alloc]initWithNibName:@"CurrentLocationMap" bundle:nil];
+	//NSLog(@"Lat::%@",strLatitude);
+	objMap.strLat=strLatitude;
+	objMap.strLong=strLongitude;
+	objMap.strTitle=strTitle1;
+	objMap.strAddress=strHouseAddress;
+	[self.navigationController pushViewController:objMap animated:YES];
+	//[objMap release];
+	}
+}
+
+-(IBAction)clickShare{
+	
+	if(flagForNoData==1)
+	{
+		[viewSokAlert setFrame:CGRectMake(19, 140, 285, 185)]; 
+	}
+	else {
+		
+	[self Share];
+	}
+}
+
+-(IBAction)clickLukk
+{
+	[viewSokAlert setFrame:CGRectMake(19, 2000, 285, 185)];
+}
+
+-(void)Share{
+	UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:@"Facebook",@"Mail", nil];
+	[actionSheet showInView:self.view];
+	[actionSheet release];
+}
+
+- (void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+	NSString *text =[self textForPosting];
+	SHKItem  *item = [SHKItem text:text];
+	
+	
+	//SHKItem * item = [SHKItem image:self.capturedImage title:appDelegate.sUserPrediction];
+	if (buttonIndex == 0) {
+		//NSLog(@"Facebook");
+		[SHKFacebook shareItem:item];
+	}
+	else if(buttonIndex == 1){
+		//NSLog(@"Mail");
+		[SHKMail shareItem:item];    
+	}
+}
+#pragma mark mail
+-(IBAction)clickOnMail:(id)sender{
+    MFMailComposeViewController *mailController = [[MFMailComposeViewController alloc] init];
+    mailController.mailComposeDelegate = self;
+	NSLog(@"%@",strMailID);
+
+	
+		mailController.mailComposeDelegate = self;
+	if ([MFMailComposeViewController canSendMail]) {  
+		NSArray *arr = [[NSArray alloc] initWithObjects:strMailID,nil];
+			 [mailController setToRecipients:arr];
+		
+		[self presentModalViewController:mailController animated:YES];
+		
+	}
+		
+	//[self presentModalViewController:mailController animated:YES];
+    [mailController release];
+}
+
+- (void)mailComposeController:(MFMailComposeViewController*)mailController didFinishWithResult:(MFMailComposeResult)result error:(NSError*)error {
+    [self becomeFirstResponder];
+    [self dismissModalViewControllerAnimated:YES];
+}
+//– setToRecipients:
+- (void)setToRecipients:(NSArray*)toRecipients{
+}
+#pragma mark call
+-(IBAction)clickOnCall:(id)sender{
+	
+	NSString *str = (NSString *) CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)strCall, NULL, CFSTR(":/?#[]@!$&’()*+,;="), kCFStringEncodingUTF8);
+	NSString *strMain = [[NSString alloc] initWithFormat:@"tel://%@",str];
+	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:strMain]];
+	
+	
+	
+	
+	
+}
+-(NSString*)textForPosting
+{
+	return [NSString stringWithFormat:@"Set Your Text Here.."];
+}
+- (NSArray*)indexPathsInSection:(NSInteger)section 
+{
+	
+	NSMutableArray *paths = [NSMutableArray array];
+	NSInteger row;	
+	for ( row = 0; row < [self numberOfRowsInSection:section]; row++ ) {
+		[paths addObject:[NSIndexPath indexPathForRow:row inSection:section]];
+	}
+	return [NSArray arrayWithArray:paths];
+}
+
+#pragma mark -
+#pragma mark Toggles
+- (void)toggle:(NSString*)isExpanded:(NSInteger)section 
+{	
+	
+	if(flagForNoData==1)
+	{
+		[viewSokAlert setFrame:CGRectMake(19, 140, 285, 185)]; 
+	}
+	else {
+		GTHeaderView *tmp;
+		int height=0;
+		if(section==0)
+		{	
+			height =650;
+		}	
+		if(section==1){
+			if ([arrSplitFacility count]==1) {
+				if ([[arrSplitFacility objectAtIndex:0] isEqual:@""]) {
+					[viewSokAlert setFrame:CGRectMake(19, 140, 285, 185)]; 
+				}
+			}
+		height= [arrSplitFacility count]*35;
+		}//(104+ ([arrSplitFacility count]*35));
+		if(section==2)
+			if (flagSecDetail==0) {
+				//cell.imgBG.frame=CGRectMake(0, 50, 340, 190);
+				height= 235;
+				
+
+			}
+		else {
+			height=382;		
+		}
+		
+		if(section==3) 
+			height=98;
+		//NSLog(@"%d",height);
+		tmp=[arrAddHeader objectAtIndex:section];
+		if([tmp.Rowstatus isEqualToString:@"NO"])
+			tmp.Rowstatus=@"YES";
+		else
+			tmp.Rowstatus=@"NO";
+		
+		if(section==3){
+			if([arrArtList count]==0)
+			{
+				UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"Områdeinfo"
+															  message:@"ingen artikkel" 
+															 delegate:self 
+													cancelButtonTitle:nil 
+													otherButtonTitles:@"OK",nil];
+				[alert show];
+				[alert release];
+			}
+		}
+		
+		NSArray *paths = [self indexPathsInSection:section];
+		BOOL isExpand=[tmp.Rowstatus isEqualToString:@"YES"];
+		if (!isExpand){
+			
+			Pre_height=Pre_height-height;
+			NSLog(@"close expand:: %d",Pre_height);
+			[MainScroll setContentSize:CGSizeMake(320,400+Pre_height)];
+			CGRect frm =tblPropertyInfo.frame;
+			frm.size.height = frm.size.height-height;
+			tblPropertyInfo.frame =frm;
+			[tblPropertyInfo deleteRowsAtIndexPaths:paths withRowAnimation:UITableViewRowAnimationFade];
+		}
+		else{
+			
+			Pre_height=Pre_height+height;
+			NSLog(@"Open expand:: %d",Pre_height);
+			CGRect frm =tblPropertyInfo.frame;
+			frm.size.height = frm.size.height+height;
+			tblPropertyInfo.frame =frm;
+			[MainScroll setContentSize:CGSizeMake(320,400+Pre_height+60)];
+			[tblPropertyInfo insertRowsAtIndexPaths:paths withRowAnimation:UITableViewRowAnimationFade];
+			
+		}
+		
+		if([tmp.Rowstatus isEqualToString:@"YES"] && section==0)
+		{
+			
+		}
+	}
+	
+	
+}
+
+- (CGRect)rectForRowAtIndexPath:(NSIndexPath *)indexPath{
+	if(indexPath.section==2)
+		if (flagSecDetail==1) {
+			
+			//CGRect *obj; //= CGRectMake(0, 0, 320, 240);
+//			obj= 
+			return CGRectMake(0, 0, 320, 180);
+		}
+	
+	
+}
+- (NSInteger)numberOfRowsInSection:(NSInteger)section 
+{
+	if (section == 0) {
+		return 1;
+	}
+	if (section == 1) {
+		return 1;
+	}
+	if (section == 2) {
+		return 1;
+	}
+	else{
+		return cntArt;
+	}
+	
+	//return  [arrAddHeader count];	
+}
+
+-(void)toggleSectionForSection:(id)sender
+{	
+	
+	GTHeaderView *tmp=[arrAddHeader objectAtIndex:[sender tag]];
+	[self toggle:tmp.Rowstatus:[sender tag]];
+
+}
+
+//Customize the number of sections in the table view.
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+	return [arrAddHeader count];
+}
+
+
+// Customize the number of rows in the table view.
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+		
+	int countOfSitesInAccount;
+	if (section == 0) {
+		countOfSitesInAccount = 1;
+	}else if (section == 1) {
+		countOfSitesInAccount = 1;
+	}else if (section == 2) {
+		countOfSitesInAccount = 1;
+	}else if (section == 3) {
+		countOfSitesInAccount =cntArt;
+	}
+	
+	//	countOfSitesInAccount = [arrAddHeader count];
+	GTHeaderView *tmp=[arrAddHeader objectAtIndex:section];
+	return [[tmp Rowstatus]isEqualToString:@"YES"]? countOfSitesInAccount : 0;
+
+}
+
+
+// Customize the appearance of table view cells.
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+	
+	
+	
+	static NSString *CellIdentifier1 = @"detail";
+    
+    static NSString *CellNib1=@"detailCell";
+	
+	detailCell *cell0= (detailCell *)[tblPropertyInfo dequeueReusableCellWithIdentifier:CellIdentifier1];
+    
+    
+    if (cell0 == nil) {
+        
+        NSArray *nib1 = [[NSBundle mainBundle] loadNibNamed:CellNib1 owner:self options:nil];
+        cell0 = (detailCell *)[nib1 objectAtIndex:0];
+        [cell0 retain];
+    }
+	
+	
+	static NSString *CellIdentifier = @"head";
+    
+    static NSString *CellNib=@"HeadlinesCellController";
+    
+     
+    
+    
+    HeadlinesCellController *cell = (HeadlinesCellController *)[tblPropertyInfo dequeueReusableCellWithIdentifier:CellIdentifier];
+    
+    
+    if (cell == nil) {
+        
+        NSArray *nib = [[NSBundle mainBundle] loadNibNamed:CellNib owner:self options:nil];
+        cell = (HeadlinesCellController *)[nib objectAtIndex:0];
+        [cell retain];
+    }
+	
+		
+	
+	static NSString *CellIdentifier2 = @"Faci";
+    
+    static NSString *CellNib2=@"Facility";
+	
+	Facility *cell1= (Facility *)[tblPropertyInfo dequeueReusableCellWithIdentifier:CellIdentifier2];
+    
+    
+    if (cell1 == nil) {
+        
+        NSArray *nib2 = [[NSBundle mainBundle] loadNibNamed:CellNib2 owner:self options:nil];
+        cell1 = (Facility *)[nib2 objectAtIndex:0];
+        [cell1 retain];
+    }
+	
+	
+	static NSString *CellIdentifier3 = @"art";
+    
+    static NSString *CellNib3=@"ArticleVCCell";
+	
+	ArticleVCCell *cellA= (ArticleVCCell *)[tblPropertyInfo dequeueReusableCellWithIdentifier:CellIdentifier3];
+    
+    
+    if (cellA == nil) {
+        
+        NSArray *nib3 = [[NSBundle mainBundle] loadNibNamed:CellNib3 owner:self options:nil];
+        cellA = (ArticleVCCell *)[nib3 objectAtIndex:0];
+        [cellA retain];
+    }
+	
+	
+	
+	
+	EGOImageView *imageViewL1 = [[EGOImageView alloc] initWithPlaceholderImage:[UIImage imageNamed:@""]];
+	imageViewL1.frame = CGRectMake(0.0f, 0.0f, 70.0f, 70.0f);
+	[cell.contentView addSubview:imageViewL1];
+	
+    //if (cell.lblSecAgentName=@"- ") {
+//        cell.frame=CGRectMake(0, 51, 353, 232);
+//    }   
+    
+	if (cell == nil) 
+	{
+		//NSLog(@"INDEX PATH%@",indexPath.section);
+		UIViewController* mycontoller =[[UIViewController alloc] initWithNibName:@"HeadlinesCellController"bundle:nil];
+		cell = (HeadlinesCellController*)mycontoller.view;
+		[mycontoller release];
+	}
+	if(cell0==nil) {
+		
+		UIViewController* mycontoller =[[UIViewController alloc] initWithNibName:@"detailCell"bundle:nil];
+		cell0 = (detailCell*)mycontoller.view;
+		[mycontoller release];
+	}
+	if(cell1==nil) {
+		
+		UIViewController* mycontoller =[[UIViewController alloc] initWithNibName:@"Facility"bundle:nil];
+		cell1 = (Facility*)mycontoller.view;
+		[mycontoller release];
+	}
+	
+	if(indexPath.section==0) 
+	{	
+		NSString *urlAddress =[[array objectAtIndex:0] valueForKey:@"descriptionurl"];
+		//NSLog(@"aaaa:::%@",urlAddress);
+		cell0.webView.backgroundColor=[UIColor clearColor];
+		
+		
+		//Create a URL object.
+		NSURL *url = [NSURL URLWithString:urlAddress];
+		
+		//URL Requst Object
+		NSURLRequest *requestObj = [NSURLRequest requestWithURL:url];
+		
+		//Load the request in the UIWebView.
+		[cell0.webView loadRequest:requestObj];
+		[cell0.webView setOpaque:NO]; 
+		cell0.webView.backgroundColor=[UIColor grayColor]; 
+		cell0.webView.alpha =0.5;
+		
+		//NSLog(@"%@",[_dict valueForKey:@"descriptionurl"]);
+//		cell0.lblUrl.text=[_dict valueForKey:@"descriptionurl"];
+		return cell0;
+	}
+	
+	if(indexPath.section==1)
+	{
+				//NSLog(@"%d",[arrSplitFacility count]);
+		//NSLog(@"%@",str);
+		cell1.imgPnt.hidden=TRUE;
+		cell1.imgPnt1.hidden=TRUE;
+		cell1.imgPnt2.hidden=TRUE;
+		cell1.imgPnt3.hidden=TRUE;
+		cell1.imgPnt4.hidden=TRUE;
+		cell1.imgPnt5.hidden=TRUE;
+
+		if([arrSplitFacility count]==0)
+		{
+			cell1.lblFaci.text=@"ingen Facility";
+		}
+		else{
+		for(int i=0;i<[arrSplitFacility count];i++){
+			if(i==0){
+				cell1.imgPnt.hidden=FALSE;
+			cell1.lblFaci.text=[arrSplitFacility objectAtIndex:i];
+			}
+			else if(i==1){
+			cell1.imgPnt1.hidden=FALSE;
+			cell1.lblFaci1.text=[arrSplitFacility objectAtIndex:i];
+			}
+			else if(i==2){
+				cell1.imgPnt2.hidden=FALSE;
+			cell1.lblFaci2.text=[arrSplitFacility objectAtIndex:i];
+			}
+			else if(i==3){
+				cell1.imgPnt3.hidden=FALSE;
+				cell1.lblFaci3.text=[arrSplitFacility objectAtIndex:i];
+			}
+			else if(i==4){
+				cell1.imgPnt4.hidden=FALSE;
+				cell1.lblFaci4.text=[arrSplitFacility objectAtIndex:i];
+			}
+			else if(i==5){
+				cell1.imgPnt5.hidden=FALSE;
+				cell1.lblFaci5.text=[arrSplitFacility objectAtIndex:i];
+			}
+		  }
+		}
+		//cell1.backgroundColor = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"bgDetailVC.png"]];
+
+		cell1.contentView.backgroundColor=[UIColor whiteColor];
+		//cell1.backgroundColor=[UIColor whiteColor];
+		return cell1;
+	}
+	
+	if (indexPath.section == 2) {
+		
+		//cell.lblCompLogo.text=[_dict valueForKey:@"companylogo"];
+		//NSString *str;
+		//str=[_dict valueForKey:@"companyname"];
+		if (flagSecDetail==0) {
+			cell.frame=CGRectMake(0, 0, 340, 180);
+			cell.imgBG.frame=CGRectMake(0, 0, 340, 180);
+			//cell.lblAgentName.hidden=TRUE;
+//			cell.lblAgentEmail.hidden=TRUE;
+//			cell.lblPhone.hidden=TRUE;
+//			cell.lblFax.hidden=TRUE;
+//			cell.lblCell.hidden=TRUE;
+//			cell.lblSecFax.hidden=TRUE;
+//			cell.lblSecCell.hidden=TRUE;
+//			cell.lblSecPhone.hidden=TRUE;
+//			cell.lblSecAgentEmail.hidden=TRUE;
+			
+			//cell.lblSecAgentEmail.hidden=TRUE;
+		}
+		strMailID=[[NSString alloc]init];
+		strCall=[[NSString alloc]init];
+		cell.lblCompName.text=[NSString stringWithFormat:@"%@",[[array objectAtIndex:0] valueForKey:@"companyname"]];
+		strMailID=[[NSString stringWithFormat:@"%@",[[array objectAtIndex:0] valueForKey:@"priAgentEmail"]]retain];
+		strCall=[[NSString stringWithFormat:@"%@",[[array objectAtIndex:0] valueForKey:@"priphone"]]retain];
+
+		NSLog(@"id is %@",strMailID);
+		//NSLog(@"bbbb::%@",[_dict valueForKey:@"companyname"]);
+		//[cell.btnMail setTitle:[NSString stringWithFormat:@"%@",[[array objectAtIndex:0]  valueForKey:@"priAgentEmail"]] forState:UIControlStateNormal];
+		//cell.lblpriAgentName=[NSString stringWithFormat:@"%@",[[array objectAtIndex:0]  valueForKey:@"priAgentname"]];
+		//cell.lblPriFax.text=[NSString stringWithFormat:@"%@",[[array objectAtIndex:0]  valueForKey:@"prifax"]];
+		
+		[cell.btnCall setTitle:[NSString stringWithFormat:@"Call-%@",[[array objectAtIndex:0]  valueForKey:@"priphone"]] forState:UIControlStateNormal];
+
+		//cell.lblPriCell=[NSString stringWithFormat:@"%@",[[array objectAtIndex:0]  valueForKey:@"pricell"]];
+
+		//cell.lblSecAgentEmail=[NSString stringWithFormat:@"%@",[[array objectAtIndex:0]  valueForKey:@"secAgentEmail"]];
+		//cell.lblSecPhone=[NSString stringWithFormat:@"%@",[[array objectAtIndex:0]  valueForKey:@"secphone"]];
+		//cell.lblSecFax=[NSString stringWithFormat:@"%@",[[array objectAtIndex:0]  valueForKey:@"secfax"]];
+		//cell.lblSecAgentName=[NSString stringWithFormat:@"%@",[[array objectAtIndex:0]  valueForKey:@"secAgentname"]];
+		//cell.lblSecCell=[NSString stringWithFormat:@"%@",[[array objectAtIndex:0]  valueForKey:@"seccell"]];
+							
+		NSString *str;
+		str=[[array objectAtIndex:0] valueForKey:@"companylogo"];
+		//NSLog(@"cm::%@",str);
+		[self setLoadImageg:[[array objectAtIndex:0] valueForKey:@"companylogo"]:imageViewL1] ;
+		[self setData:_dict];
+		return cell;
+	}
+	if (indexPath.section==3) {
+		if([arrArtList count]!=0)
+		{
+			dict =[arrArtList objectAtIndex:indexPath.row];
+			[cellA setData: dict];
+			cellA.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+			cellA.backgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"header_w.png"]];
+		}
+		return cellA;
+	}
+	 
+	cell.backgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"header_w.png"]];
+    //return cell;
+	
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+	
+	//NSLog(@"%d",indexPath.row);
+	if (indexPath.section == 0) {
+		return 480;
+	 }
+	else if (indexPath.section == 1) {
+			
+		if ([arrSplitFacility count]==1) {
+			if ([[arrSplitFacility objectAtIndex:0] isEqual:@""]) {
+				return 0;
+			}
+			else 
+				return [arrSplitFacility count]*35;
+		}
+		return [arrSplitFacility count]*35;
+		
+	}
+	else if (indexPath.section == 2) {
+		if (flagSecDetail==0) {
+//			CGRect obj;
+//			obj=[self rectForRowAtIndexPath:indexPath];
+//			return obj.size.height;
+			//cell.imgBG.frame=CGRectMake(0, 50, 340, 190);
+			return  180;
+		}
+		else {
+		return 180;
+		}
+	}else if (indexPath.section == 3) {
+		return 98;
+	}
+	
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section 
+{
+	if (section==2) {
+		return 35;	
+	}
+	else
+	{
+	return 35;
+	}
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section 
+{
+	return [arrAddHeader objectAtIndex:section];
+}
+
+#pragma mark -
+#pragma mark Table view delegate
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+	if(indexPath.section==3){
+		dict =[arrArtList objectAtIndex:indexPath.row];
+	NSString *strIdArt=[dict valueForKey:@"id"];
+	appdel.strArtID=strIdArt; 
+	//NSLog(@"%@",appdel.strArtID);
+	ArticleDetail *detailViewController = [[ArticleDetail alloc] initWithNibName:@"ArticleDetail" bundle:nil];
+
+	[self.navigationController pushViewController:detailViewController animated:YES];
+	//[detailViewController release];
+	}
+
+}
+
+#pragma mark -
+#pragma mark custom methods
+-(void)clickBack
+{
+	[self.navigationController popViewControllerAnimated:YES];
+}
+
+
+-(IBAction)clickLagre
+{	
+	viewAlert.hidden= NO;
+	[viewAlert setFrame:CGRectMake(19, 100, 285, 185)];
+}
+
+-(IBAction)clickSave
+{
+	viewAlert.hidden= YES;
+	if(appdel.buttonClick==1)
+	{
+		[self GDATASaveSok];
+	}
+	
+	if(appdel.buttonClick==2)
+	{
+		[self GDATASave];
+	}
+	//[viewAlert setFrame:CGRectMake(19, 470, 285, 185)];
+}
+
+-(IBAction)clickCancel{
+	viewAlert.hidden= YES;
+		
+	//[viewAlert setFrame:CGRectMake(19, 470, 285, 185)];
+}
+
+
+
+- (void)didReceiveMemoryWarning {
+    // Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+    
+    // Release any cached data, images, etc. that aren't in use.
+}
+
+- (void)viewDidUnload {
+    [super viewDidUnload];
+    // Release any retained subviews of the main view.
+    // e.g. self.myOutlet = nil;
+}
+
+- (void)dealloc {
+    [super dealloc];
+	
+	[lblDepartmentName release];
+	[titleLable release];
+	[lblAreaName release];
+	[lblAreaIs release];
+	[lblDistance release];
+	[lblImgCnt release];
+	
+	if(arrSplitFacility!=nil){
+		arrSplitFacility=nil;
+		[arrSplitFacility release];
+	}
+	
+	if(arrContact!=nil){
+		arrContact=nil;
+		[arrContact release];
+	}
+	if(array!=nil){
+		array=nil;
+		[array release];
+	}
+	if(arrDesUrl!=nil){
+		arrDesUrl=nil;
+		[arrDesUrl release];
+	}
+	if(strURL!=nil){
+		strURL=nil;
+		[strURL release];
+	}
+	if(arrSecondaryImg!=nil){
+		arrSecondaryImg=nil;
+		[arrSecondaryImg release];
+	}
+	if(lblDepartmentName!=nil){
+		lblDepartmentName=nil;
+		[lblDepartmentName release];
+	}
+	if(lblAreaName!=nil){
+		lblAreaName=nil;
+		[lblAreaName release];
+	}
+	if(lblAreaIs!=nil){
+		lblAreaIs=nil;
+		[lblAreaIs release];
+	}
+	if(lblDistance!=nil){
+		lblDistance=nil;
+		[lblDistance release];
+	}
+	if(titleLable!=nil){
+		titleLable=nil;
+		[titleLable release];
+	}		
+	if(tblPropertyInfo!=nil){
+		tblPropertyInfo=nil;
+		[tblPropertyInfo release];
+	}
+	if(strDepartmentName!=nil){
+		strDepartmentName=nil;
+		[strDepartmentName release];
+	}
+	if(strAreaName!=nil){
+		strAreaName=nil;
+		[strAreaName release];
+	}
+	if(strAreaIs!=nil){
+		strAreaIs=nil;
+		[strAreaIs release];
+	}
+	if(strDistance!=nil){
+		strDistance=nil;
+		[strDistance release];
+	}
+	
+	[strMailID release];
+	[strCall release];
+}
+@end

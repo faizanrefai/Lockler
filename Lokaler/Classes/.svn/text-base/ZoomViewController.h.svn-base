@@ -1,0 +1,24 @@
+//
+//  ZoomViewController.h
+//  Zoom
+//
+//  Created by Fernando Bunn on 10/3/10.
+//  Copyright __MyCompanyName__ 2010. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "EstateLokalerAppDelegate.h"
+
+@class PropertiesDetailVC;
+@interface ZoomViewController : UIViewController <UIScrollViewDelegate> {
+	UIImageView *image;
+	int cnt ;
+	UIImage *myImage;
+	PropertiesDetailVC *obj;
+	EstateLokalerAppDelegate *appdel;
+}
+
+@property(nonatomic,retain)UIImageView *image;
+@property(nonatomic,retain) UIImage *myImage;
+@end
+

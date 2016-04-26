@@ -1,0 +1,147 @@
+//
+//  SokeFilterVC.h
+//  EstateLokaler
+//
+//  Created by apple on 9/7/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
+#import "ALPickerView.h"
+@class EstateLokalerAppDelegate;
+@class PropertyListMode;
+@class ALPickerView;
+
+@interface SokeFilterVC : UIViewController <ALPickerViewDelegate> {
+	
+	PropertyListMode *objPropertyListMode;
+	IBOutlet UIPickerView *typeLokalePicker;
+	IBOutlet UIToolbar *downPickerToolBar;
+	IBOutlet UILabel *lblTypeLokale;
+	IBOutlet UILabel *lblTypeLokaleText;
+	
+	IBOutlet UILabel *lblFlyke;
+	IBOutlet UILabel *lblArea;
+	IBOutlet UILabel *lblSize;
+	IBOutlet UILabel *lblOmradeTitle;
+	IBOutlet UIView *viewAlert;
+	UILabel *lbl;
+	
+	NSMutableArray *arrFlyke;
+	NSMutableArray *arrLat;
+	NSMutableArray *arrLong;
+	NSMutableArray *arrListFlyke;
+	NSMutableArray *arrayTypeLokale;
+	NSMutableArray *arrayCountLokale;
+	NSMutableArray *arrayDisplay;
+	NSMutableArray *arrayDisplayTown;
+	
+	NSMutableArray *arrListArea;
+	NSMutableArray *arrArea;
+	NSMutableArray *arrListSize;
+	NSMutableArray *arrSize;
+	NSMutableArray *arrFlykeId;
+	NSMutableArray *arrTypeLokaleID;
+	NSMutableArray *arrFylkeID;
+	NSMutableArray *arrAreaID;
+	NSMutableArray *arrSizeID;	
+	NSMutableArray *arrSave;
+	NSMutableArray *arrSplitSize;
+	NSMutableArray *distance;
+	NSMutableArray *arrFilterLokalerID;
+	NSMutableArray *arrFilterFlykeID;
+	NSMutableArray *arrFilterAreaID;
+	NSMutableArray *arrFilterSizeID;
+	NSMutableArray *arrFilterSize;
+	NSMutableArray *filterArr;
+	NSMutableArray *filterArr1;
+	NSMutableArray *filterArr2;
+	NSMutableArray *filterArr3;
+	
+	//NSMutableArray *arrBack;
+	
+	NSString *strTypeLokaleID;
+	NSString *strFylkeID;
+	NSString *strAreaID;
+	NSString *strSizeID;
+	NSInteger rowId;
+	UIButton *btncheck;
+	
+	IBOutlet UIButton *btnLokale;
+	IBOutlet UIButton *btnFylke;
+	IBOutlet UIButton *btnOmrade;
+	IBOutlet UIButton *btnSize;
+	//NSString *getLok;
+		NSString *lblText;
+	NSString *lblText1;
+	NSString *lblText2;
+	NSString *lblText3;
+	
+	NSString *lblRelease;
+	NSString *lblRelease1;
+	NSString *lblRelease2;
+	NSString *lblRelease3;
+	
+	IBOutlet UIButton *btnFerdig;
+	
+	UIImageView *img1;
+	
+	EstateLokalerAppDelegate *appdel;
+	ALPickerView *pickerView;
+	
+	int cnt;
+	NSString *strTown;
+	NSMutableDictionary *t_dic;
+	NSMutableDictionary *t_dic1;
+	NSMutableDictionary *t_dic2;
+	NSMutableDictionary *t_dicSize;
+	NSMutableDictionary *selectionStates;
+	
+	int flagSave;
+	
+}
+
+//@property int flagSave;
+//@property(nonatomic,retain)	NSString *str;
+//@property(nonatomic,retain) NSString *strAreaID;
+//@property(nonatomic,retain) NSMutableArray *arrAreaID;
+//@property(nonatomic,retain) NSMutableArray *arrayTypeLokale;
+//@property(nonatomic,retain) NSMutableArray *arrTypeLokaleID;
+//@property(nonatomic,retain) NSMutableString *strTypeLokaleID;
+//@property(nonatomic,retain) NSMutableString *strFylkeID;
+//@property(nonatomic,retain) NSMutableString *strSizeID;
+@property(nonatomic,retain)NSMutableArray *distance;
+
+
+
+
+//@property (nonatomic,retain)IBOutlet UIView *viewAlert;
+
+-(void)setToolBarFrames;
+-(void)presentPickerView:(NSInteger)btnTag;
+-(IBAction)clickBack;
+-(IBAction)clickTypeLokale;
+-(IBAction)clickFylke;
+-(IBAction)clickKommuneOmrade;
+-(IBAction)clickStorrelse;
+-(IBAction)clickNullStillAlleFilter;
+-(IBAction)clickBruk;
+-(IBAction)clickFerdig;
+-(IBAction)clickYes;
+-(IBAction)clickNo;
+
+-(void)GDATA;
+-(void)finishGetData:(NSDictionary*)dictionary;
+-(void)finishGetDataArea:(NSDictionary*)dictionary;
+-(void)GDATAArea;
+-(void)GDATAFylke;
+-(void)GDATASize;
+-(void)GDATASaveNo;
+-(void)GDATAYes;
+-(void)finishGetDataFylke:(NSDictionary*)dictionary;
+-(void)finishGetDataSize:(NSDictionary*)dictionary;
+
+
+@end
+

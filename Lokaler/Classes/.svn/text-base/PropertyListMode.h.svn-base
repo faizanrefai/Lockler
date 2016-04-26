@@ -1,0 +1,137 @@
+//
+//  PropertyListMode.h
+//  EstateLokaler
+//
+//  Created by apple on 9/6/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+#import "REVClusterMapView.h"
+#import "REVClusterPin.h"
+#import "REVClusterAnnotationView.h"
+#import "REVClusterMap.h"
+#import <UIKit/UIKit.h>
+#import <MapKit/MapKit.h>
+#import "ALPickerView.h"
+
+@class GdataParser;
+@class EstateLokalerAppDelegate;
+@class PropertyListModeCell;
+@class PropertiesDetailVC;
+@class SokeFilterVC;
+@class ALPickerView;
+
+@interface PropertyListMode : UIViewController <MKMapViewDelegate,UIGestureRecognizerDelegate> {
+
+	IBOutlet MKMapView	*MapView;
+	IBOutlet UIView		*listView;
+	IBOutlet UIView		*mapView;
+	IBOutlet UITableView *tblView;
+	IBOutlet UIPickerView *typeLokalePicker;
+	
+	//ALPickerView *pickerView;
+	
+	IBOutlet UIToolbar	*downPickerToolBar;
+	IBOutlet UILabel	*lblTypeLokale;
+	IBOutlet UIButton	*btnFerdig;
+	IBOutlet UIButton	*btnFilter;
+	
+	EGOImageView *imageViewL;
+	IBOutlet UIButton	*seg;
+	IBOutlet UILabel	*lblAreal;
+	IBOutlet UIButton	*btnAreal;
+	IBOutlet UIButton *btnProperty;
+
+	IBOutlet UILabel	*lblTitleSoq;
+	IBOutlet UILabel	*lblSort;
+	IBOutlet UIView		*promonthView;
+	IBOutlet UIImageView *imgSegKart;
+	IBOutlet UIButton *btnBack;
+	IBOutlet UIImageView *propImg;
+	
+	IBOutlet UILabel *lblCount;	
+	IBOutlet UILabel *lblAddHouseNo;
+	IBOutlet UILabel *lblDepartment;
+	IBOutlet UILabel *lblTitle;
+	IBOutlet UILabel *lblDesc;
+	IBOutlet UILabel *lblCompName;
+	
+	
+	NSMutableArray *arrayTypeLokale;
+	NSMutableArray *arraySortListDisplay;
+	NSMutableArray *arrayTwelveData;
+	
+	NSMutableArray *searchArray;
+	NSMutableArray *arrLatSokSearch;
+	NSMutableArray *arrLongSokSearch;
+	NSMutableArray *arrTitleSokSearch;
+	NSMutableArray *arrPOM;
+	NSMutableArray *arrLat,*arrLong;
+	NSMutableArray *dist;
+	NSMutableArray *arrDistance;
+	NSMutableArray *filterArr;
+	
+	EstateLokalerAppDelegate *appdel;
+	PropertiesDetailVC *objPropertyDetailVC;
+	SokeFilterVC *objSokeFilterVC;
+	PropertyListModeCell *objPropertyListModeCell;
+	REVClusterMapView *_mapView;
+	
+	NSMutableDictionary *_dict;
+	NSMutableDictionary *dict_SortList;
+	NSMutableDictionary *dict_SortListDisplay;
+	NSMutableDictionary *dict_twelveData;
+	
+	NSMutableDictionary *dict_SokSearch;
+	NSMutableDictionary *d;
+	NSMutableDictionary *dictPOM;
+	NSMutableDictionary *selectionStates;
+	
+	NSString *strTmp;	
+	NSMutableArray *strSortBy;
+	NSMutableArray *strSortID;
+	NSString *strAddress;
+	NSString *strPropertyID;
+	
+	int strCount;	
+	int flagSortListDisplay;
+	//int cnt;	
+	int cnt1;
+	int currentArrayCount;
+	NSURL *imgURL;
+	int selrow;
+	
+	NSInteger key;
+}
+
+@property int strCount;
+//@property(nonatomic,retain) NSString *strTmp;
+//@property (nonatomic,retain) NSMutableArray *arrayTypeLokale;
+//@property (nonatomic,retain) NSMutableArray *arraySortListDisplay;
+//@property (nonatomic,retain) NSMutableArray *arrayTwelveData;
+//
+//@property (nonatomic,retain) NSMutableDictionary *_dict;
+//@property(nonatomic,retain) UITableView *tblView;
+
+-(void)GDATA;
+-(void)GDATASearch;
+-(void)GDATASokDetail;
+-(void)GDATATwelve;
+-(void)setToolBarFrames;
+-(void)GDATAPremises;
+
+-(IBAction)clickList;
+-(IBAction)clickBack;
+-(IBAction)clickSokeFilter;
+-(IBAction)clickSortList;
+-(IBAction)clickFerdig;
+-(IBAction)clickKart;
+-(IBAction)clickClose;
+-(IBAction)clickProperty;
+-(void)GdataUpdate;
+-(void)GDATAPropertyOfMon;
+-(void)clickSelect:(id)sender;
+-(void)setLoadImageg:(NSString*)loadimage:(EGOImageView*)img;
+-(void)getMapannotation: (NSMutableArray *)arr;
+-(MKAnnotationView *)mapView:(MKMapView *)mV viewForAnnotation:
+(id <MKAnnotation>)annotation;
+@end

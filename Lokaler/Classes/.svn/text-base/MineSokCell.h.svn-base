@@ -1,0 +1,36 @@
+//
+//  MineSokCell.h
+//  EstateLokaler
+//
+//  Created by apple on 9/7/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@class PropertyListMode;
+@interface MineSokCell : UITableViewCell {
+
+	
+	
+	IBOutlet UILabel *lblFromTo;
+	IBOutlet UILabel *lblArea;
+	IBOutlet UILabel *lblTown;
+	IBOutlet UILabel *lblTitle;
+	IBOutlet UILabel *lblDate;
+	NSString *strDate;
+	NSString *strTitle;
+	NSString *strArea;
+	NSString *strFromTo;
+	NSString *strTown;
+	NSString *strDept;
+	IBOutlet UILabel *lblDept;
+	IBOutlet UILabel *lblCntProp;
+	IBOutlet UIButton *btnDetails;
+}
+-(IBAction)clickDetails;
+-(void)setData:(NSMutableDictionary*)dt;
+-(void)setDataForLabels:(NSMutableDictionary*)dt1;
+@property(nonatomic,retain)IBOutlet UILabel *lblCntProp;
+
+@end

@@ -1,0 +1,445 @@
+//
+//  RootViewController.m
+//  EstateLokaler
+//
+//  Created by apple on 9/6/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//  test.....
+
+#import "RootViewController.h"
+#import "PropertyListMode.h"
+#import "MineSokVC.h"
+#import "MineFunnVC.h"
+#import "PropertyMapMode.h"
+#import "GdataParser.h"
+#import "EstateLokalerAppDelegate.h"
+#import "PropertyMapMode.h"
+#import "SokeFilterVC.h"
+#import "Overlay.h"
+#import "MineSokVC.h"
+#import "PropertyListMode.h"
+#import "WSPContinuous.h"
+#import "webService.h"
+#import "ContactUs.h"
+#import "EstateMedia.h"
+
+@implementation RootViewController
+@synthesize strSearch,txtSearch,strSokSearch;
+@synthesize _dict,pastUrls;
+
+-(void)GDATA{	
+	
+	GdataParser *parser = [[GdataParser alloc] init];
+	[parser downloadAndParse:[NSURL
+							  URLWithString:[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=autosuggsted"]]
+				 withRootTag:@"post" 
+					withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"cnt",@"cnt",nil]
+	 					 sel:@selector(finishGetData:) 
+				  andHandler:self];
+}
+
+-(void)finishGetData:(NSDictionary*)dictionary{
+	//NSLog(@"This is dictionary: %@",dictionary);
+	//[array removeAllObjects];
+	NSMutableArray *array1 =[[dictionary valueForKey:@"array"]retain];
+    for(int i=0;i<[array1 count];i++){
+        NSMutableDictionary *_dict1=[array1 objectAtIndex:i];
+        [array addObject:[_dict1 valueForKey:@"cnt"]];
+		[pastUrls addObject:[_dict1 valueForKey:@"cnt"]];
+	}
+	
+   //pastUrls=[[NSMutableArray alloc]initWithArray] [array copy];
+    [autocompleteTableView reloadData];
+}
+
+
+#pragma mark -
+#pragma mark View lifecycle
+- (void)viewDidLoad {
+    [super viewDidLoad];
+	appdel=(EstateLokalerAppDelegate *)[[UIApplication sharedApplication]delegate];
+	tblView.hidden=TRUE;
+	txtSearch.delegate=self;
+	tblView.delegate=self;
+	tblView.dataSource=self;
+	
+
+	//ßßappdel.flagsokSearch=0;
+	appdel.currentElement=0;
+	
+	
+	self.navigationController.navigationBar.hidden = YES;
+	[[NSUserDefaults standardUserDefaults] setObject:nil forKey:@"MapOrListTag"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+	
+	[viewSokAlert setFrame:CGRectMake(19, 470, 285, 185)];
+
+	lblTime.text=[[NSDate date] description];
+	
+	[NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(showTime) userInfo:nil repeats:YES];
+	
+	self.pastUrls = [[NSMutableArray alloc] init];
+    //self.autocompleteUrls = [[NSMutableArray alloc] init];
+    autocompleteTableView = [[UITableView alloc] initWithFrame:
+                             CGRectMake(60, 163, 209, 132) style:UITableViewStylePlain];
+    autocompleteTableView.delegate = self;
+    autocompleteTableView.dataSource = self;
+    autocompleteTableView.scrollEnabled = YES;
+    autocompleteTableView.hidden = YES;  
+    [self.view addSubview:autocompleteTableView];
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+	appdel.signSok=0;
+	appdel.flagFilter=0;
+	appdel.flagFilter=0;
+	appdel.flagsokSearch=0;	
+	appdel.flagOfTwelve=0;
+	appdel.flagOfPremises=0;
+	[txtSearch resignFirstResponder];
+	autocompleteTableView.hidden=TRUE;
+	tblView.hidden=TRUE;
+	txtSearch.text=@"";
+	if(appdel.sokCnt==0)
+	{
+		[viewSokAlert setFrame:CGRectMake(19, 120, 285, 185)];
+    }
+    else if (appdel.sokCnt==10) {
+        [viewSokAlert setFrame:CGRectMake(19, 120, 285, 185)];
+    }
+	else {
+		[viewSokAlert setFrame:CGRectMake(19, 490, 285, 185)];
+	}
+	
+	_dict       =[[NSMutableDictionary alloc] init];
+	strSearch   =[[NSMutableString alloc]init];
+	strSokSearch=[[NSMutableString alloc]init];
+	copyListOfItems =[[NSMutableArray alloc]init];
+	arrCount	=[[NSMutableArray alloc]init];
+	array       =[[NSMutableArray alloc]init];
+	
+	[self GDATACount];
+	//[self GDATA];
+}
+
+-(void)GDATACount{
+    WSPContinuous *wspcontinuous;
+    wspcontinuous = [[WSPContinuous alloc] initWithRequestForThread:[webService getURq_getansascreen:[webService getWS_countXML:appdel.udID]]
+                                                            rootTag:@"getnewpropertiescount"
+                                                        startingTag:[NSDictionary dictionaryWithObjectsAndKeys:nil] 
+                                                          endingTag:[NSDictionary dictionaryWithObjectsAndKeys:@"getnewpropertiescount",@"getnewpropertiescount",nil]
+                                                          otherTags:[NSDictionary dictionaryWithObjectsAndKeys:nil] 
+                                                                sel:@selector(finishedParsing:) 
+                                                         andHandler:self];
+}
+
+-(void)finishedParsing:(NSDictionary*)dictionary{
+
+	NSMutableArray *array1 =[[NSMutableArray alloc] init];
+	NSMutableArray *arrname =[[NSMutableArray alloc] init];
+	NSMutableDictionary *dic=[[NSMutableDictionary alloc]init];
+	if (![[dic valueForKey:@"getnewpropertiescount"] isEqualToString:@"0"]) {
+		[arrname addObjectsFromArray:[dictionary valueForKey:@"array"]];
+		//NSString *str
+		for (int i=0; i<[arrname count]; i++) {
+		[array1 addObjectsFromArray:[arrname valueForKey:@"getnewpropertiescount"]];
+		dic=[array1 objectAtIndex:i];
+			
+		lblCountText.text=[NSString stringWithFormat:@"Det er lagt til %@ nye lokaler som matcher dine lagrede søk",dic];	
+			
+	lblcnt.text=[NSString stringWithFormat:@"%@",dic];
+	}	
+		//	lblcnt.text=UITextAlignmentCenter;
+		[self GDATA];
+}
+}
+
+
+// following method will be called frequently.
+
+-(void)showTime{
+    lblTime.text=[[NSDate date] description];
+}
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    autocompleteTableView.hidden = NO;
+    
+    NSString *substring = [NSString stringWithString:txtSearch.text];
+    substring = [substring  stringByReplacingCharactersInRange:range withString:string];
+    [self searchAutocompleteEntriesWithSubstring:substring];
+    return YES;
+}
+
+#pragma mark UITableViewDataSource methods
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger) section {
+  if( pastUrls.count==0)
+	  autocompleteTableView.hidden =TRUE;
+	return pastUrls.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *CellIdentifier = @"Cell";
+    
+    UITableViewCell *cell = [tblView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier] autorelease];
+    }
+    //NSMutableDictionary *_dict1=
+    cell.textLabel.text=[pastUrls objectAtIndex:indexPath.row];
+	cell.textLabel.font=[UIFont systemFontOfSize:16.0];
+
+    //cell.textLabel.text = [array objectAtIndex:indexPath.row];
+    return cell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+	return 33;	
+}
+
+
+#pragma mark UITableViewDelegate methods
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    UITableViewCell *selectedCell = [tableView cellForRowAtIndexPath:indexPath];
+    txtSearch.text = selectedCell.textLabel.text;
+    autocompleteTableView.hidden =YES;
+	
+}
+
+- (void)searchAutocompleteEntriesWithSubstring:(NSString *)substring {
+    
+    // Put anything that starts with this substring into the autocompleteUrls array
+    // The items in this array is what will show up in the table view
+
+    [pastUrls removeAllObjects];
+    for(NSString *curString in array) {
+        NSRange substringRange = [curString rangeOfString:substring options:NSCaseInsensitiveSearch];
+		
+        //NSRange substringRange = [curString rangeOfString:substring];
+        if (substringRange.location == 0) {
+            [pastUrls addObject:curString];  
+        }
+    }
+    [autocompleteTableView reloadData];
+}
+
+
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField{
+	autocompleteTableView.hidden =FALSE;
+	[autocompleteTableView reloadData];
+	return YES;
+}
+
+//-(void) touchesBegan :(NSSet *) touches withEvent:(UIEvent *)event
+//{
+//	[txtSearch resignFirstResponder];
+//	//tableView.hidden=FALSE;
+//	//[textField2 resignFirstResponder];
+//	[super touchesBegan:touches withEvent:event ];
+//}
+// 
+
+
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+	autocompleteTableView.hidden =YES;
+	[textField resignFirstResponder];
+	return YES;
+}
+
+#pragma mark -
+#pragma mark Custom methods
+-(void)clickPropertyListMode
+{	
+	[[NSUserDefaults standardUserDefaults] setObject:nil forKey:@"MapOrListTag"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+	[[NSUserDefaults standardUserDefaults] setObject:@"1" forKey:@"MapOrListTag"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+	//if(detailViewController !=nil)
+	//[detailViewController release];
+	if([lblcnt.text isEqualToString:@"0"])
+		{
+			[viewSokAlert setFrame:CGRectMake(19, 120, 285, 185)];
+			
+		}
+    else{
+            if (objPropertyList!=nil) {
+                [objPropertyList release];
+            }
+        appdel.flagOfTwelve=1;
+           
+	objPropertyList = [[PropertyListMode alloc] initWithNibName:@"PropertyListMode" bundle:nil];
+	//[cell setData: _dict];	
+	
+	[self.navigationController pushViewController:objPropertyList animated:YES];
+}
+    appdel.flagOfPremises=0;
+}
+	
+-(void)clickMineSok
+{
+	//sokFilterVC=[[SokeFilterVC alloc]init];
+    if (detailViewController!=nil) {
+        [detailViewController release];
+    }
+	detailViewController = [[MineSokVC alloc] initWithNibName:@"MineSokVC" bundle:nil];
+	//[sokFilterVC GDATA];
+	[self.navigationController pushViewController:detailViewController animated:YES];
+}
+
+-(void)clickMineFunn
+{
+	MineFunnVC *detailViewController1 = [[MineFunnVC alloc] initWithNibName:@"MineFunnVC" bundle:nil];
+	[self.navigationController pushViewController:detailViewController1 animated:YES];
+    [detailViewController1 release];
+
+}
+
+-(void)clickSokBtn
+{
+	appdel.flagOfPremises=0;
+	appdel.buttonClick=1;
+	//[viewSokAlert setFrame:CGRectMake(19, 140, 285, 185)];
+	[[NSUserDefaults standardUserDefaults] setObject:nil forKey:@"MapOrListTag"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+	[[NSUserDefaults standardUserDefaults] setObject:@"2" forKey:@"MapOrListTag"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+    //if (objPropertyList!=nil) {
+//        [objPropertyList release];
+//    }
+	objPropertyList = [[PropertyListMode alloc] initWithNibName:@"PropertyListMode" bundle:nil];
+	
+	strSokSearch=txtSearch.text;
+	appdel.appdelStrSearch=strSokSearch;
+	
+	
+	if ([strSokSearch isEqual:@""]) {
+		appdel.flagsokSearch=0;
+	}
+	else {
+		appdel.flagsokSearch=1;
+	}
+NSLog(@"flag:: %d",appdel.flagsokSearch);
+	[self.navigationController pushViewController:objPropertyList animated:YES];
+}
+
+-(IBAction)clickLokalerNaerheten
+{
+	//ßappdel.flagsokSearch=5;
+	appdel.buttonClick=2;
+		
+	
+	appdel.flagOfPremises=1;
+	//NSLog(@"flag:::%@",appdel.flagOfPremises);
+
+	[[NSUserDefaults standardUserDefaults] setObject:nil forKey:@"MapOrListTag"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+	[[NSUserDefaults standardUserDefaults] setObject:@"2" forKey:@"MapOrListTag"];
+	[[NSUserDefaults standardUserDefaults] synchronize];
+    if (objPropertyList!=nil) {
+        [objPropertyList release];
+    }
+	[self GDATAPremises];
+	if ([appdel.arrayPremises count]==0) {
+		[viewSokAlert setFrame:CGRectMake(19, 120, 285, 185)];
+	}
+	else {
+		
+		objPropertyList = [[PropertyListMode alloc] initWithNibName:@"PropertyListMode" bundle:nil];
+		[self.navigationController pushViewController:objPropertyList animated:YES];
+
+	}
+
+}
+
+-(void)GDATAPremises{
+	//NSString *urlstring=[NSString stringWithFormat:@"http://www.estatelokaler.no/response.php?token=closureprop&lat=59.90965726713029&lon=10.72318448771361"];
+	
+	NSString *urlstring=[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=closureprop&lat=%f&lon=%f ",appdel.lat,appdel.lon];
+	//NSLog(@"aa:%@",appdel.appdelStrSearch);
+	GdataParser *parserPremises= [[GdataParser alloc] init];
+	[parserPremises downloadAndParse:[NSURL URLWithString:[urlstring stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]
+						 withRootTag:@"post" 
+							withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"id",@"id",@"title",@"title",@"adress",@"adress",@"houseno",@"houseno",@"latitude",
+									  @"latitude",@"longitude",@"longitude",@"shortDescription",@"shortDescription",@"mainimage",@"mainimage",@"areaname",@"areaname",@"townname",@"townname"
+									  ,@"fromarea",@"fromarea",@"toarea",@"toarea",@"departmentname",@"departmentname",nil]
+								 sel:@selector(finishGetDataPremises:) 
+						  andHandler:self];
+}
+
+-(void)finishGetDataPremises:(NSDictionary*)dictionary{
+	appdel.arrayPremises =[dictionary valueForKey:@"array"] ;
+		//NSLog(@"cnt array::: %d",[appdel.arrayPremises count]);
+	
+	
+}
+
+-(void)clickLukk
+{
+	[viewSokAlert setFrame:CGRectMake(19, 470, 285, 185)];
+}
+
+-(IBAction)clickContactUs{
+	
+	ContactUs *objContactUs=[[ContactUs	alloc]initWithNibName:@"ContactUs" bundle:nil];
+	[self.navigationController pushViewController:objContactUs animated:YES];
+	[objContactUs release];
+}
+-(IBAction)clickEstateMedia{
+	EstateMedia *objEstateMedia = [[EstateMedia alloc]initWithNibName:@"EstateMedia" bundle:nil];
+	[self.navigationController pushViewController:objEstateMedia animated:YES];
+	[objEstateMedia release];
+}
+
+#pragma mark -
+#pragma mark Memory management
+
+- (void)didReceiveMemoryWarning {
+    // Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+    
+    // Relinquish ownership any cached data, images, etc that aren't in use.
+}
+
+- (void)viewDidUnload {
+    // Relinquish ownership of anything that can be recreated in viewDidLoad or on demand.
+    // For example: self.myOutlet = nil;
+}
+- (void)dealloc {
+    [super dealloc];
+	
+	if(array!=nil)
+	{
+		[array removeAllObjects];
+		[array release];
+		array=nil;
+	}
+	if(copyListOfItems!=nil)
+	{
+		[copyListOfItems removeAllObjects];
+		[copyListOfItems release];
+		copyListOfItems=nil;
+	}
+	if(arrCount!=nil)
+	{
+		[arrCount removeAllObjects];
+		[arrCount release];
+		arrCount=nil;
+	}
+	
+	
+	[tblView release];
+	[lblCountText release];	
+	[searchArray release];
+	[strSearch release];
+	[txtSearch release];
+	[lblTime release]; 
+	[_dict release];       
+	[strSearch release];
+	[sokFilterVC release];
+}
+@end

@@ -1,0 +1,12 @@
+In file included from /currentprojects/finalestate/Lokaler/Classes/EstateLokalerAppDelegate.m:9:
+/currentprojects/finalestate/Lokaler/Classes/EstateLokalerAppDelegate.h:12:36: error: RootViewController_ipad.h: No such file or directory
+/currentprojects/finalestate/Lokaler/Classes/EstateLokalerAppDelegate.h:13:36: error: ZoomViewController_Ipad.h: No such file or directory
+/currentprojects/finalestate/Lokaler/Classes/EstateLokalerAppDelegate.h:14:26: error: MineFunnPopVw.h: No such file or directory
+/currentprojects/finalestate/Lokaler/Classes/EstateLokalerAppDelegate.m:205: warning: property 'dictTown' requires method '-dictTown' to be defined - use @synthesize, @dynamic or provide a method implementation
+/currentprojects/finalestate/Lokaler/Classes/EstateLokalerAppDelegate.m:205: warning: property 'dictTown' requires the method 'setDictTown:' to be defined - use @synthesize, @dynamic or provide a method implementation
+/currentprojects/finalestate/Lokaler/Classes/EstateLokalerAppDelegate.m:205: warning: property 'dictArea' requires method '-dictArea' to be defined - use @synthesize, @dynamic or provide a method implementation
+/currentprojects/finalestate/Lokaler/Classes/EstateLokalerAppDelegate.m:205: warning: property 'dictArea' requires the method 'setDictArea:' to be defined - use @synthesize, @dynamic or provide a method implementation
+/currentprojects/finalestate/Lokaler/Classes/EstateLokalerAppDelegate.m:205: warning: property 'dictDept' requires method '-dictDept' to be defined - use @synthesize, @dynamic or provide a method implementation
+/currentprojects/finalestate/Lokaler/Classes/EstateLokalerAppDelegate.m:205: warning: property 'dictDept' requires the method 'setDictDept:' to be defined - use @synthesize, @dynamic or provide a method implementation
+/currentprojects/finalestate/Lokaler/Classes/EstateLokalerAppDelegate.m:205: warning: incomplete implementation of class 'EstateLokalerAppDelegate'
+/currentprojects/finalestate/Lokaler/Classes/EstateLokalerAppDelegate.m:205: warning: method definition for '-GDATAAutoSugested' not found

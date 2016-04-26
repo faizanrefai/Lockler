@@ -1,0 +1,83 @@
+//
+//  RootViewController.h
+//  EstateLokaler
+//
+//  Created by apple on 9/6/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+
+
+#import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
+@class GdataParser;
+@class EstateLokalerAppDelegate;
+@class PropertyMapMode;
+@class SokeFilterVC;
+@class Overlay;
+@class MineSokVC;
+@class PropertyListMode;
+@class ContactUs;
+@class EstateMedia;
+
+@interface RootViewController : UIViewController <UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate>{
+	
+	IBOutlet UIView *viewSokAlert;
+	
+	IBOutlet UITableView *tblView;
+	IBOutlet UITextField *txtSearch;
+	IBOutlet UILabel *lblTime;
+	IBOutlet UILabel *lblCountText;
+	IBOutlet UILabel *lblcnt;
+	IBOutlet UIButton *btnContactUs;
+		
+	BOOL searching;
+	BOOL letUserSelectRow;
+	
+	NSMutableString *strSearch;
+	NSString *strSokSearch;
+	NSString *strcnt;
+	NSString *selectedCountry;
+	
+	NSMutableArray *array;
+	NSMutableArray *copyListOfItems;
+	NSMutableArray *Items;
+	NSMutableArray *searchArray;
+	NSMutableArray *arrCount;
+	NSMutableArray *pastUrls;
+	
+	NSMutableDictionary *_dict;
+	NSMutableDictionary *_dictcnt;
+	
+	Overlay *ovController;
+	
+	SokeFilterVC *sokFilterVC;
+	PropertyMapMode *objPropertyMapMode;
+	PropertyListMode *objPropertyList;
+	MineSokVC *detailViewController;
+	EstateLokalerAppDelegate *appdel;
+		
+	UITableView *autocompleteTableView;
+	int tempComplete;
+}
+
+- (void) searchTableView;
+- (void)searchAutocompleteEntriesWithSubstring:(NSString *)substring;
+
+@property (nonatomic,retain) NSMutableArray *pastUrls;
+@property (nonatomic,retain) NSMutableDictionary *_dict;
+@property (nonatomic,retain) NSString *strSokSearch;
+@property(nonatomic,retain) NSMutableString *strSearch;
+@property(nonatomic,retain) UITextField *txtSearch;
+
+-(IBAction)clickPropertyListMode;
+-(IBAction)clickMineSok;
+-(IBAction)clickMineFunn;
+-(IBAction)clickSokBtn;
+-(IBAction)clickLokalerNaerheten;
+-(IBAction)clickLukk;
+-(IBAction)clickContactUs;
+-(IBAction)clickEstateMedia;
+
+-(void)GDATACount;
+-(void)GDATAPremises;
+
+@end

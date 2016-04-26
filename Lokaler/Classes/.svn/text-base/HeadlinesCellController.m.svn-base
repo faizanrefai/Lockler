@@ -1,0 +1,60 @@
+//
+//  HeadlinesCellController.m
+//  UPI
+//
+//  Created by Vivek on 08/12/10.
+//  Copyright 2010 VivekSharma. All rights reserved.
+//
+#import	"PropertiesDetailVC.h"
+#import "HeadlinesCellController.h"
+#import	"ArticleVC.h"
+
+@implementation HeadlinesCellController
+@synthesize lblNews,lblCompName,lblpriAgentName,lblPriPhone,lblPriFax,lblPriCell,
+lblPriAgentEmail,lblSecAgentName,lblSecPhone,lblSecCell,lblSecFax,lblSecAgentEmail,lblUrl;
+@synthesize imgBG,lblAgentName,lblPhone,lblCell,lblFax,lblAgentEmail,btnCall;
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        // Initialization code.
+    }
+    return self;
+}
+
+//- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section 
+//{
+//	return 300;
+//}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    
+    [super setSelected:selected animated:animated];
+    
+    // Configure the view for the selected state.
+}
+
+- (void)dealloc {
+    [super dealloc];
+	[imgBG release];
+	[lblAgentName release];
+	[lblPhone release];
+	[lblCell release];
+	[lblFax release];
+	[lblAgentEmail release];
+	
+	[lblNews release];
+	[lblCompName release];	
+	[lblpriAgentName release];
+	[lblPriPhone release];
+	[lblPriFax release];
+	[lblPriAgentEmail release];
+	[lblSecAgentName release];
+	[lblSecPhone release];
+	[lblSecCell release];
+	[lblSecFax release];
+	[lblSecAgentEmail release];	
+	[lblUrl release];
+}
+@end

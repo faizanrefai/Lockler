@@ -1,0 +1,73 @@
+//
+//  HeadlinesCellController.h
+//  UPI
+//
+//  Created by Vivek on 08/12/10.
+//  Copyright 2010 VivekSharma. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import <MessageUI/MessageUI.h>
+@class ArticleVC;
+
+@interface HeadlinesCellController : UITableViewCell <MFMailComposeViewControllerDelegate>{
+	
+	IBOutlet UILabel *lblNews;
+	IBOutlet UILabel *lblCompName;
+
+	IBOutlet UILabel *lblpriAgentName;
+	IBOutlet UILabel *lblPriPhone;
+	IBOutlet UILabel *lblPriFax;
+	IBOutlet UILabel *lblPriAgentEmail;
+	IBOutlet UILabel *lblSecAgentName;
+	IBOutlet UILabel *lblSecPhone;
+	IBOutlet UILabel *lblSecCell;
+	IBOutlet UILabel *lblSecFax;
+	IBOutlet UILabel *lblSecAgentEmail;
+	
+//	IBOutlet UILabel *SecAgentName;
+//	IBOutlet UILabel *SecPhone;
+//	IBOutlet UILabel *SecCell;
+//	IBOutlet UILabel *SecFax;
+//	IBOutlet UILabel *SecAgentEmail;
+	
+	IBOutlet UILabel *lblUrl;
+	IBOutlet UILabel *lblPriCell;
+	IBOutlet UIImageView *imgView;
+	IBOutlet UIImageView *imgBG;
+	IBOutlet UILabel *lblAgentName;
+	IBOutlet UILabel *lblPhone;
+	IBOutlet UILabel *lblCell;
+	IBOutlet UILabel *lblFax;
+	IBOutlet UILabel *lblAgentEmail;
+	IBOutlet UIButton *btnCall;
+
+
+	
+}
+
+@property(nonatomic,retain)UIButton *btnCall;
+
+@property(nonatomic,retain)UIImageView *imgView;
+@property(nonatomic,retain)UILabel* lblNews;
+@property(nonatomic,retain)UILabel *lblCompName;
+
+@property(nonatomic,retain)UILabel *lblpriAgentName;
+@property(nonatomic,retain)UILabel *lblPriPhone;
+@property(nonatomic,retain)UILabel *lblPriFax;
+@property(nonatomic,retain)UILabel *lblPriAgentEmail;
+@property(nonatomic,retain)UILabel *lblSecAgentName;
+@property(nonatomic,retain)UILabel *lblSecPhone;
+@property(nonatomic,retain)UILabel *lblSecCell;
+@property(nonatomic,retain)UILabel *lblSecFax;
+@property(nonatomic,retain)UILabel *lblSecAgentEmail;
+@property(nonatomic,retain)UILabel *lblUrl;
+@property(nonatomic,retain)UILabel *lblPriCell;
+@property(nonatomic,retain)IBOutlet UIImageView *imgBG;
+@property(nonatomic,retain)IBOutlet UILabel *lblAgentName;
+@property(nonatomic,retain)IBOutlet UILabel *lblPhone;
+@property(nonatomic,retain)IBOutlet UILabel *lblCell;
+@property(nonatomic,retain)IBOutlet UILabel *lblFax;
+@property(nonatomic,retain)IBOutlet UILabel *lblAgentEmail;
+
+@end 

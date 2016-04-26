@@ -1,0 +1,665 @@
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/realestate/!svn/ver/717/EstateLokaler/Classes
+END
+TBXML.m
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/TBXML.m
+END
+PropertyMapMode.m
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/PropertyMapMode.m
+END
+detailCell.xib
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/644/EstateLokaler/Classes/detailCell.xib
+END
+webService.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/webService.h
+END
+MineSokVC.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/MineSokVC.h
+END
+SokeFilterVC.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/SokeFilterVC.h
+END
+HeadlinesCellController.h
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/realestate/!svn/ver/678/EstateLokaler/Classes/HeadlinesCellController.h
+END
+webService.m
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/webService.m
+END
+MineSokVC.m
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/MineSokVC.m
+END
+SokeFilterVC.m
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/715/EstateLokaler/Classes/SokeFilterVC.m
+END
+HeadlinesCellController.m
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/realestate/!svn/ver/679/EstateLokaler/Classes/HeadlinesCellController.m
+END
+ArticleVC.xib
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/realestate/!svn/ver/701/EstateLokaler/Classes/ArticleVC.xib
+END
+EGOImageView.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/EGOImageView.h
+END
+Overlay.xib
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/Overlay.xib
+END
+EGOImageView.m
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/EGOImageView.m
+END
+Overlay.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/Overlay.h
+END
+Overlay.m
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/Overlay.m
+END
+WTHeaderView.xib
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/realestate/!svn/ver/709/EstateLokaler/Classes/WTHeaderView.xib
+END
+EstateLokalerAppDelegate.h
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/EstateLokalerAppDelegate.h
+END
+Facility.xib
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/realestate/!svn/ver/644/EstateLokaler/Classes/Facility.xib
+END
+EstateLokalerAppDelegate.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/realestate/!svn/ver/663/EstateLokaler/Classes/EstateLokalerAppDelegate.m
+END
+DisplayMap.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/DisplayMap.h
+END
+EGOImageLoader.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/EGOImageLoader.h
+END
+ArticleDetail.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/realestate/!svn/ver/654/EstateLokaler/Classes/ArticleDetail.h
+END
+MineFunnVC.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/MineFunnVC.h
+END
+DisplayMap.m
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/DisplayMap.m
+END
+PropertiesDetailVC.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/realestate/!svn/ver/680/EstateLokaler/Classes/PropertiesDetailVC.h
+END
+EGOImageLoader.m
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/EGOImageLoader.m
+END
+EGOImageButton.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/EGOImageButton.h
+END
+ArticleDetail.m
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/realestate/!svn/ver/654/EstateLokaler/Classes/ArticleDetail.m
+END
+ArticleVCCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/ArticleVCCell.h
+END
+PropertiesDetailVC.m
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/realestate/!svn/ver/709/EstateLokaler/Classes/PropertiesDetailVC.m
+END
+MineFunnVC.m
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/realestate/!svn/ver/637/EstateLokaler/Classes/MineFunnVC.m
+END
+ZoomViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/ZoomViewController.xib
+END
+EGOImageButton.m
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/EGOImageButton.m
+END
+PropertyListModeCell.xib
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/realestate/!svn/ver/640/EstateLokaler/Classes/PropertyListModeCell.xib
+END
+EstateMedia.xib
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/realestate/!svn/ver/646/EstateLokaler/Classes/EstateMedia.xib
+END
+ArticleVCCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/ArticleVCCell.m
+END
+RootViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/RootViewController.h
+END
+ZoomViewController.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/ZoomViewController.h
+END
+UITableViewCell+NIB.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/UITableViewCell+NIB.h
+END
+REVClusterAnnotationView.h
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/REVClusterAnnotationView.h
+END
+PropertyListModeCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/PropertyListModeCell.h
+END
+EstateMedia.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/EstateMedia.h
+END
+RootViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/realestate/!svn/ver/681/EstateLokaler/Classes/RootViewController.m
+END
+ZoomViewController.m
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/ZoomViewController.m
+END
+UITableViewCell+NIB.m
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/UITableViewCell+NIB.m
+END
+REVClusterAnnotationView.m
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/REVClusterAnnotationView.m
+END
+MineSokVC.xib
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/realestate/!svn/ver/700/EstateLokaler/Classes/MineSokVC.xib
+END
+PropertyListModeCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/realestate/!svn/ver/661/EstateLokaler/Classes/PropertyListModeCell.m
+END
+EstateMedia.m
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/realestate/!svn/ver/646/EstateLokaler/Classes/EstateMedia.m
+END
+SokeFilterVC.xib
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/realestate/!svn/ver/715/EstateLokaler/Classes/SokeFilterVC.xib
+END
+GdataParser.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/GdataParser.h
+END
+ContactUs.xib
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/ContactUs.xib
+END
+MineSokCell.xib
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/realestate/!svn/ver/692/EstateLokaler/Classes/MineSokCell.xib
+END
+detailCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/detailCell.h
+END
+GdataParser.m
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/GdataParser.m
+END
+ContactUs.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/ContactUs.h
+END
+CurrentLocationMap.xib
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/realestate/!svn/ver/689/EstateLokaler/Classes/CurrentLocationMap.xib
+END
+AlertHandler.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/AlertHandler.h
+END
+MineSokCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/MineSokCell.h
+END
+NewDetail.xib
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/NewDetail.xib
+END
+detailCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/detailCell.m
+END
+GDataXMLNode.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/GDataXMLNode.h
+END
+CheckView.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/CheckView.h
+END
+ContactUs.m
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/ContactUs.m
+END
+CurrentLocationMap.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/CurrentLocationMap.h
+END
+MineSokCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/realestate/!svn/ver/690/EstateLokaler/Classes/MineSokCell.m
+END
+AlertHandler.m
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/702/EstateLokaler/Classes/AlertHandler.m
+END
+GDataXMLNode.m
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/GDataXMLNode.m
+END
+ArticleVC.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/ArticleVC.h
+END
+CheckView.m
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/CheckView.m
+END
+iCodeBlogAnnotationView.h
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/iCodeBlogAnnotationView.h
+END
+GTHeaderView.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/GTHeaderView.h
+END
+CurrentLocationMap.m
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/CurrentLocationMap.m
+END
+PropertyListMode.xib
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/realestate/!svn/ver/717/EstateLokaler/Classes/PropertyListMode.xib
+END
+ArticleVC.m
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/ArticleVC.m
+END
+iCodeBlogAnnotation.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/iCodeBlogAnnotation.h
+END
+iCodeBlogAnnotationView.m
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/iCodeBlogAnnotationView.m
+END
+GTHeaderView.m
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/709/EstateLokaler/Classes/GTHeaderView.m
+END
+ALPickerView.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/ALPickerView.h
+END
+PropertyListMode.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/realestate/!svn/ver/672/EstateLokaler/Classes/PropertyListMode.h
+END
+iCodeBlogAnnotation.m
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/iCodeBlogAnnotation.m
+END
+ALPickerView.m
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/ALPickerView.m
+END
+PropertyListMode.m
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/realestate/!svn/ver/717/EstateLokaler/Classes/PropertyListMode.m
+END
+EGOImageLoadConnection.h
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/EGOImageLoadConnection.h
+END
+EGOCache.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/EGOCache.h
+END
+WSPContinuous.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/WSPContinuous.h
+END
+ArticleDetail.xib
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/realestate/!svn/ver/701/EstateLokaler/Classes/ArticleDetail.xib
+END
+EGOImageLoadConnection.m
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/EGOImageLoadConnection.m
+END
+MineFunnVC.xib
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/694/EstateLokaler/Classes/MineFunnVC.xib
+END
+EGOCache.m
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/EGOCache.m
+END
+PropertiesDetailVC.xib
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/realestate/!svn/ver/714/EstateLokaler/Classes/PropertiesDetailVC.xib
+END
+TBxmlParser.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/TBxmlParser.h
+END
+Facility.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/Facility.h
+END
+WSPContinuous.m
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/WSPContinuous.m
+END
+CustomTapGestureRecognizer.h
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/CustomTapGestureRecognizer.h
+END
+ArticleVCCell.xib
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/realestate/!svn/ver/654/EstateLokaler/Classes/ArticleVCCell.xib
+END
+TBxmlParser.m
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/TBxmlParser.m
+END
+Facility.m
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/Facility.m
+END
+NSDataAdditions.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/NSDataAdditions.h
+END
+MineFunnCell.xib
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/MineFunnCell.xib
+END
+CustomTapGestureRecognizer.m
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/CustomTapGestureRecognizer.m
+END
+RootViewController.xib
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/realestate/!svn/ver/707/EstateLokaler/Classes/RootViewController.xib
+END
+NSDataAdditions.m
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/NSDataAdditions.m
+END
+MineFunnCell.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/MineFunnCell.h
+END
+PropertyMapMode.xib
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/realestate/!svn/ver/700/EstateLokaler/Classes/PropertyMapMode.xib
+END
+MineFunnCell.m
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/MineFunnCell.m
+END
+TBXML.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/TBXML.h
+END
+PropertyMapMode.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/realestate/!svn/ver/634/EstateLokaler/Classes/PropertyMapMode.h
+END

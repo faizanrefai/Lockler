@@ -1,0 +1,20 @@
+//
+//  detailCell.h
+//  EstateLokaler
+//
+//  Created by apple1 on 10/15/11.
+//  Copyright 2011 openxcek. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+
+@interface detailCell : UITableViewCell {
+
+	IBOutlet UIWebView *webView;
+}
+
+@property (nonatomic, retain) UIWebView *webView;
+
+
+@end

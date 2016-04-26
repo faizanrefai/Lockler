@@ -1,0 +1,1402 @@
+//
+//  PropertyListMode.m
+//  EstateLokaler
+//
+//  Created by apple on 9/6/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import "PropertyListMode.h"
+#import "PropertyListModeCell.h"
+#import "UITableViewCell+NIB.h"
+#import "PropertiesDetailVC.h"
+#import "SokeFilterVC.h"
+#import "PropertyMapMode.h"
+#import "GdataParser.h"
+#import "EstateLokalerAppDelegate.h"
+#import "PropertyListModeCell.h"
+#import "PropertiesDetailVC.h"
+#import "EGOImageView.h"
+#import "AlertHandler.h"
+#import "SokeFilterVC.h"
+#import "Math.h"
+
+#define FONT_SIZE 14.0f
+#define CELL_CONTENT_WIDTH 320.0f
+#define CELL_CONTENT_MARGIN 10.0f
+
+@implementation PropertyListMode
+//@synthesize tblView,_dict,strTmp;
+//@synthesize strSort;
+//@synthesize arrayTypeLokale,arraySortListDisplay;
+//@synthesize arrayTwelveData;
+@synthesize strCount;
+// The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
+/*
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        // Custom initialization.
+    }
+    return self;
+}
+*/
+
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+- (void)viewDidLoad {
+    [super viewDidLoad];	
+	flagSortListDisplay=0;
+	appdel.flag=0;
+	//appdel.sokCnt=1;
+	promonthView.hidden=YES;
+	appdel=(EstateLokalerAppDelegate *)[[UIApplication sharedApplication]delegate];
+	
+	 
+	_mapView = [[REVClusterMapView alloc] initWithFrame:CGRectMake(0,0, 320, 480)];
+    _mapView.delegate = self;
+	
+    
+	lblTitleSoq.hidden=YES;
+	listView.hidden=YES;
+	MapView.hidden =NO;
+	//if(MapView.hidden==FALSE)
+//	{  btnBack.hidden=YES; }
+	
+	
+	[MapView addSubview:_mapView];
+}
+  
+- (void)viewWillAppear:(BOOL)animated{
+	
+	NSLog(@"flag:: %d",appdel.flagsokSearch);
+	appdel.sokCnt=1;
+	if(appdel.flagDetailVC==1)
+	{
+	lblTitleSoq.hidden=YES;
+	[tblView reloadData];
+	}
+	
+	else{
+		
+	if(appdel.flagOfTwelve==1)
+	{
+		listView.hidden=NO;
+		MapView.hidden =YES;
+		lblTitleSoq.hidden=YES;
+		// btnBack.hidden=NO;
+		promonthView.hidden=YES;
+	}
+	
+//	if(MapView.hidden==FALSE)
+//	{  btnBack.hidden=YES; }
+	
+	//lblCount.text=@"HI";
+	imgSegKart.image=[UIImage imageNamed:@"topBarKart.png"];
+	strSortBy=[[NSMutableArray alloc]init];
+	strSortID=[[NSMutableArray alloc]init];
+
+	dist=[[NSMutableArray alloc]init];
+	arrLat=[[NSMutableArray alloc]init];
+	arrLong=[[NSMutableArray alloc]init];
+	arrayTypeLokale = [[NSMutableArray alloc] init];
+	
+	arraySortListDisplay=[[NSMutableArray alloc]init];
+	arrayTwelveData=[[NSMutableArray alloc]init];
+	searchArray=[[NSMutableArray alloc]init];
+	arrLatSokSearch=[[NSMutableArray alloc]init];
+	arrLongSokSearch=[[NSMutableArray alloc]init];
+	arrTitleSokSearch=[[NSMutableArray alloc]init];
+		filterArr=[[NSMutableArray alloc]init];
+		
+	[self setToolBarFrames];
+	
+	lblTitleSoq.hidden=TRUE;
+	
+	if (appdel.flagFilter==1) {
+		[tblView reloadData];
+		lblTitleSoq.hidden=YES;
+		
+		arrDistance=appdel.distance;
+		lblCount.text=[NSString stringWithFormat:@"%d treff",[appdel.appdel_ArrayFilterBack count]];
+		//lblCount.text=[appdel.appdel_ArrayFilterBack count];
+		
+		[self getMapannotation:appdel.currentArray];
+	}	
+	else if(appdel.signSok==1)
+	{
+		//listView.hidden=NO;
+		MapView.hidden =YES;
+		lblTitleSoq.hidden=NO;
+		//btnBack.hidden=NO;
+		[self GDATASokDetail];
+	}		
+	else if (appdel.flagOfTwelve==1) {
+		//NSLog(appdel.udID);
+		lblTitleSoq.hidden=YES;
+	[self GDATATwelve];
+		//NSLog(@"udid::::::: %@",appdel.udID)
+	}  
+	else if (appdel.flagsokSearch==1){
+		lblTitleSoq.hidden=YES;
+		[self GDATASearch];
+	}	
+	else if (appdel.flagFilter==2){
+		lblTitleSoq.hidden=YES;
+		[tblView reloadData];
+		arrDistance=appdel.distance;
+		currentArrayCount=[appdel.currentArray count];
+        //NSLog(@"cnt::%d",currentArrayCount);
+		lblCount.text=[NSString stringWithFormat:@"%d treff",currentArrayCount];
+		
+		[self getMapannotation:appdel.currentArray];
+	}
+	else if(appdel.isDetail) {
+		appdel.isDetail = FALSE;
+		lblTitleSoq.hidden=YES;
+	}
+	
+	else if(appdel.flagOfPremises==1)
+	{	
+		//promonthView.hidden=YES;
+//		if(listView.hidden==FALSE)
+//		{  btnBack.hidden=NO; }
+        listView.hidden=YES;
+		lblTitleSoq.hidden=YES;
+		[self GDATAPremises];
+		
+		
+	}
+
+	else {
+		lblTitleSoq.hidden=YES;
+		
+		[self GDATA];	
+		
+	}
+	}
+}
+
+-(void)GDATAPremises{
+	//NSString *urlstring=[NSString stringWithFormat:@"http://www.estatelokaler.no/response.php?token=closureprop&lat=59.90965726713029&lon=10.72318448771361"];
+	
+	NSString *urlstring=[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=closureprop&lat=%f&lon=%f ",appdel.lat,appdel.lon];
+	//NSLog(@"aa:%@",appdel.appdelStrSearch);
+    [AlertHandler showAlertForProcess];
+
+	GdataParser *parserPremises= [[GdataParser alloc] init];
+	[parserPremises downloadAndParse:[NSURL URLWithString:[urlstring stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]
+					   withRootTag:@"post" 
+						  withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"id",@"id",@"title",@"title",@"adress",@"adress",@"houseno",@"houseno",@"latitude",
+									@"latitude",@"longitude",@"longitude",@"shortDescription",@"shortDescription",@"mainimage",@"mainimage",@"areaname",@"areaname",@"townname",@"townname"
+									,@"fromarea",@"fromarea",@"toarea",@"toarea",@"departmentname",@"departmentname",nil]
+							 sel:@selector(finishGetDataPremises:) 
+						andHandler:self];
+}
+
+-(void)finishGetDataPremises:(NSDictionary*)dictionary{
+	
+    [AlertHandler hideAlert];
+
+    
+    appdel.arrayPremises =[dictionary valueForKey:@"array"] ;
+	//appdel.dicPremises=[dictionary valueForKey:@"array"];
+	//NSLog(@"Premises::::%@",appdel.dicPremises);
+	appdel.currentArray=appdel.arrayPremises;
+	
+	[arrLat removeAllObjects];
+	[arrLong removeAllObjects];
+	[dist removeAllObjects];
+	
+	arrLat=[[dictionary valueForKey:@"latitude"]retain];
+	arrLong=[[dictionary valueForKey:@"longitude"]retain];
+   // NSLog(@"arr cnt::%d",[appdel.arrayPremises count]);
+    if([appdel.arrayPremises count]==0)
+    {
+       // NSLog(@"%@",self.navigationController.viewControllers);
+		appdel.sokCnt=10;
+        [self.navigationController popToRootViewControllerAnimated: YES];
+        
+    }
+    else{
+     appdel.sokCnt=1;
+	for(int i=0;i<[arrLat count];i++)
+	{
+		
+		NSString *strlat;
+		NSString *strlong;
+		strlat=[arrLat objectAtIndex:i];
+		strlong=[arrLong objectAtIndex:i];
+		CLLocation *poiLoc = [[CLLocation alloc] initWithLatitude: [strlat doubleValue] longitude: [strlong doubleValue]];
+		
+		CLLocation *userLoc = [[CLLocation alloc] initWithLatitude:appdel.lat longitude:appdel.lon];
+		
+		double dist1 = [userLoc getDistanceFrom:poiLoc];
+		NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+		[formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+		[formatter setMaximumFractionDigits:2];
+		[formatter setRoundingMode: NSNumberFormatterRoundHalfUp];
+		
+		NSString *numberString = [formatter stringFromNumber:[NSNumber numberWithFloat:dist1]];
+		
+		[formatter release];
+		//NSLog(@"%@",numberString);
+		
+		if(dist1<999)
+			[dist addObject:[NSString stringWithFormat:@"%@ meter",numberString]];
+		else{
+			
+			float temp;
+			temp=dist1/1000;
+			[dist addObject:[NSString stringWithFormat:@"%.2f KM",temp]];
+		}
+					
+		//double dist = 
+		//[self getDistance:appdel.lat:appdel.lon:[strlat doubleValue]:[strlong doubleValue]];
+	}
+		[tblView reloadData];
+		[self GDATAPropertyOfMon];
+		[self getMapannotation:appdel.currentArray];
+	}
+}
+
+
+-(void)GDATASearch{	
+	
+	NSString *urlstring=[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=propertylist&txt_sted=%@",appdel.appdelStrSearch];
+	//NSLog(@"aa:%@",appdel.appdelStrSearch);
+    [AlertHandler showAlertForProcess];
+
+	GdataParser *parserSearch= [[GdataParser alloc] init];
+	[parserSearch downloadAndParse:[NSURL URLWithString:[urlstring stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]
+				  withRootTag:@"post" 
+					 withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"id",@"id",@"title",@"title",@"adress",@"adress",@"houseno",@"houseno",@"latitude",
+							   @"latitude",@"longitude",@"longitude",@"shortDescription",@"shortDescription",@"mainimage",@"mainimage",@"areaname",@"areaname",@"townname",@"townname"
+							   ,@"fromarea",@"fromarea",@"toarea",@"toarea",@"departmentname",@"departmentname",nil]
+						  sel:@selector(finishGetDataSokSearch:) 
+				   andHandler:self];
+}
+
+-(void)finishGetDataSokSearch:(NSDictionary*)dictionary{
+	//NSLog(@"This is dictionary: %@",dictionary);
+    [AlertHandler hideAlert];
+    
+	[searchArray removeAllObjects];
+	[arrLatSokSearch removeAllObjects];
+	[arrLongSokSearch removeAllObjects];
+	[arrTitleSokSearch removeAllObjects];
+	[dist removeAllObjects];
+
+	searchArray =[[dictionary valueForKey:@"array"] retain];
+	dict_SokSearch=[dictionary valueForKey:@"array"];
+	//NSLog(@"Array::%@",searchArray);
+	//[searchArray removeAllObjects];
+	appdel.currentArray=searchArray;
+	
+	lblCount.text=[NSString stringWithFormat:@"%d treff",[searchArray count]];
+	
+	//NSLog(@"app Array::%@",appdel.currentArray);
+	arrLatSokSearch=[dict_SokSearch valueForKey:@"latitude"];
+	arrLongSokSearch=[dict_SokSearch valueForKey:@"longitude"];
+	arrTitleSokSearch=[dict_SokSearch valueForKey:@"title"];
+	
+    if([searchArray count]==0)
+    {
+        appdel.sokCnt=0;
+        //RootViewController *root=[[RootViewController alloc]initWithNibName:@"RootViewController" bundle:nil];
+        [self.navigationController popToRootViewControllerAnimated:YES];
+	}
+	
+    else {
+        appdel.sokCnt=1;
+		for(int i=0;i<[arrLatSokSearch count];i++)
+	{
+        NSString *strlat;
+		NSString *strlong;
+		strlat=[arrLatSokSearch objectAtIndex:i];
+		strlong=[arrLongSokSearch objectAtIndex:i];
+		CLLocation *poiLoc = [[CLLocation alloc] initWithLatitude: [strlat doubleValue] longitude: [strlong doubleValue]];
+		
+		CLLocation *userLoc = [[CLLocation alloc] initWithLatitude:appdel.lat longitude:appdel.lon];
+        double dist1 = [userLoc getDistanceFrom:poiLoc];
+		NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+		[formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+		[formatter setMaximumFractionDigits:2];
+		[formatter setRoundingMode: NSNumberFormatterRoundHalfUp];
+		
+		NSString *numberString = [formatter stringFromNumber:[NSNumber numberWithFloat:dist1]];
+		
+		[formatter release];
+		//NSLog(@"%@",numberString);
+		
+		if(dist1<999)
+			[dist addObject:[NSString stringWithFormat:@"%@meters",numberString]];
+		else{
+			
+			float temp;
+			temp=dist1/1000;
+			[dist addObject:[NSString stringWithFormat:@"%.2f kvm",temp]];
+        }
+    }
+	[tblView reloadData];
+		
+	[self GDATAPropertyOfMon];
+	[self getMapannotation:appdel.currentArray];
+    }
+}
+
+
+-(void)GDATATwelve{	
+	//NSString *parserTwelve=[NSString stringWithFormat:@"http://www.estatelokaler.no/response.php?token=closureprop&lat=59.90965726713029&lon=10.72318448771361"];
+
+    [AlertHandler showAlertForProcess];
+
+	GdataParser *parserTwelve = [[GdataParser alloc] init];
+	[parserTwelve downloadAndParse:[NSURL
+							  URLWithString:[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=getnewpropertieslist&udid=%@",appdel.udID]]
+				 withRootTag:@"post" 
+					withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"id",@"id",@"title",@"title",@"adress",@"adress",@"houseno",@"houseno",@"latitude",@"latitude",@"longitude",@"longitude",@"shortDescription",@"shortDescription",@"mainimage",@"mainimage",@"areaname",@"areaname",@"townname",@"townname",@"fromarea",@"fromarea",@"toarea",@"toarea",@"departmentname",@"departmentname",@"date_insert",@"date_insert",nil]
+						 sel:@selector(finishGetDataTwelve:) 
+				  andHandler:self];
+} 
+
+-(void)finishGetDataTwelve:(NSDictionary*)dictionary{
+    
+    [AlertHandler hideAlert];
+
+	//NSLog(@"This is dictionary: %@",dictionary);
+	[arrayTwelveData removeAllObjects];
+	
+	dict_twelveData =[[dictionary valueForKey:@"array"]retain];
+	arrayTwelveData =[[dictionary valueForKey:@"array"] retain];
+	
+	appdel.currentArray=arrayTwelveData;
+	
+	lblCount.text=[NSString stringWithFormat:@"%d treff",[arrayTwelveData count]];
+	[arrLat removeAllObjects];
+	[arrLong removeAllObjects];
+	[dist removeAllObjects];
+	
+	arrLat=[[dict_twelveData valueForKey:@"latitude"]retain];
+	arrLong=[[dict_twelveData valueForKey:@"longitude"]retain];
+	for(int i=0;i<[arrLat count];i++)
+	{
+		
+		NSString *strlat;
+		NSString *strlong;
+		strlat=[arrLat objectAtIndex:i];
+		strlong=[arrLong objectAtIndex:i];
+		CLLocation *poiLoc = [[CLLocation alloc] initWithLatitude: [strlat doubleValue] longitude: [strlong doubleValue]];
+		
+		CLLocation *userLoc = [[CLLocation alloc] initWithLatitude:appdel.lat longitude:appdel.lon];
+		
+		double dist1 = [userLoc getDistanceFrom:poiLoc];
+		NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+		[formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+		[formatter setMaximumFractionDigits:2];
+		[formatter setRoundingMode: NSNumberFormatterRoundHalfUp];
+		
+		NSString *numberString = [formatter stringFromNumber:[NSNumber numberWithFloat:dist1]];
+		
+		[formatter release];
+		//NSLog(@"%@",numberString);
+		
+		if(dist1<999)
+			[dist addObject:[NSString stringWithFormat:@"%@ meter",numberString]];
+		else{
+			
+			float temp;
+			temp=dist1/1000;
+			[dist addObject:[NSString stringWithFormat:@"%.2f KM",temp]];
+		}
+	}
+	[tblView reloadData];
+	[self getMapannotation:appdel.currentArray];
+}
+
+-(void)GDATA{	
+
+    [AlertHandler showAlertForProcess];
+
+	GdataParser *parser = [[GdataParser alloc] init];
+	[parser downloadAndParse:[NSURL
+							  URLWithString:@"http://www.estatelokaler.no/appservice.php?token=propertylist"]
+				 withRootTag:@"post" 
+					withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"id",@"id",@"title",@"title",@"adress",@"adress",@"houseno",@"houseno",@"latitude",@"latitude",@"longitude",@"longitude",@"shortDescription",@"shortDescription",@"mainimage",@"mainimage",@"areaname",@"areaname",@"townname",@"townname",@"fromarea",@"fromarea",@"toarea",@"toarea",@"departmentname",@"departmentname",nil]
+						 sel:@selector(finishGetData:) 
+				  andHandler:self];
+}
+
+-(void)finishGetData:(NSDictionary*)dictionary{
+    
+    [AlertHandler hideAlert];
+
+	//NSLog(@"This is dictionary: %@",dictionary);
+	[appdel.arrList removeAllObjects];
+	appdel.arrList =[[dictionary valueForKey:@"array"] retain];
+	
+	arrLat=[[appdel.arrList valueForKey:@"latitude"]retain];
+	
+	arrLong=[[appdel.arrList valueForKey:@"longitude"]retain];
+	//[appdel.arrList removeAllObjects];
+	appdel.currentArray=appdel.arrList;
+	
+	lblCount.text=[NSString stringWithFormat:@"%d treff",[appdel.arrList count]];
+	if([appdel.arrList count]==0)
+	{
+		appdel.sokCnt=0;
+		//RootViewController *root=[[RootViewController alloc]initWithNibName:@"RootViewController" bundle:nil];
+		[self.navigationController popViewControllerAnimated:YES];
+		
+	}
+	else {
+		appdel.sokCnt=1;
+	for(int i=0;i<[arrLat count];i++)
+	{
+		NSString *strlat;
+		NSString *strlong;
+		strlat=[arrLat objectAtIndex:i];
+		strlong=[arrLong objectAtIndex:i];
+		CLLocation *poiLoc = [[CLLocation alloc] initWithLatitude: [strlat doubleValue] longitude: [strlong doubleValue]];
+		
+		//NSLog(@"%f  %f",appdel.lat,appdel.lon);
+		CLLocation *userLoc = [[CLLocation alloc] initWithLatitude:appdel.lat longitude:appdel.lon];
+				
+		 double dist1 = [userLoc getDistanceFrom:poiLoc];
+		NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+		[formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+		[formatter setMaximumFractionDigits:2];
+		[formatter setRoundingMode: NSNumberFormatterRoundHalfUp];
+		
+		NSString *numberString = [formatter stringFromNumber:[NSNumber numberWithFloat:dist1]];
+		
+		[formatter release];
+		//NSLog(@"%@",numberString);
+		
+		if(dist1<999)
+			[dist addObject:[NSString stringWithFormat:@"%@ meters",numberString]];
+		else{
+			
+			float temp;
+			temp=dist1/1000;
+			[dist addObject:[NSString stringWithFormat:@"%.2f KM",temp]];
+			
+		}
+		//double dist = 
+		//[self getDistance:appdel.lat:appdel.lon:[strlat doubleValue]:[strlong doubleValue]];
+	
+	}
+	
+	}
+	[tblView reloadData];
+	
+	[self getMapannotation:appdel.currentArray];
+	[self GDATAPropertyOfMon];
+	
+}
+
+
+
+-(void)GDATASortListDisplay{
+	//NSLog(@"str::%@",appdel.appdelStrSortID);
+    [AlertHandler showAlertForProcess];
+
+	GdataParser *parser2 = [[GdataParser alloc] init];
+	[parser2 downloadAndParse:[NSURL URLWithString:[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=propertylist&sortby=%@",appdel.appdelStrSortID]]
+				  withRootTag:@"post" 
+					 withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"id",@"id",@"title",@"title",@"adress",@"adress",@"houseno",@"houseno",@"latitude",@"latitude",@"longitude",@"longitude",@"shortDescription",@"shortDescription",@"mainimage",@"mainimage",@"areaname",@"areaname",@"townname",@"townname",@"fromarea",@"fromarea",@"toarea",@"toarea",@"departmentname",@"departmentname",nil]
+						  sel:@selector(finishGetDataSortListDisplay:) 
+				   andHandler:self];
+}
+
+-(void)finishGetDataSortListDisplay:(NSDictionary*)dictionary{
+    
+    [AlertHandler hideAlert];
+
+	//NSLog(@"This is dictionary: %@",dictionary);
+	flagSortListDisplay=1;
+	[arraySortListDisplay removeAllObjects];
+	[dist removeAllObjects];
+	arraySortListDisplay =[[dictionary valueForKey:@"array"] retain];
+	dict_SortListDisplay=[[dictionary valueForKey:@"array"] retain];
+	lblCount.text=[NSString stringWithFormat:@"%d treff",[arraySortListDisplay count]];
+	
+	arrLat=[[dict_SortListDisplay valueForKey:@"latitude"]retain];
+	arrLong=[[dict_SortListDisplay valueForKey:@"longitude"]retain];
+	for(int i=0;i<[arrLat count];i++)
+	{
+		
+		NSString *strlat;
+		NSString *strlong;
+		strlat=[arrLat objectAtIndex:i];
+		strlong=[arrLong objectAtIndex:i];
+		CLLocation *poiLoc = [[CLLocation alloc] initWithLatitude: [strlat doubleValue] longitude: [strlong doubleValue]];
+		
+		CLLocation *userLoc = [[CLLocation alloc] initWithLatitude:appdel.lat longitude:appdel.lon];
+		
+		double dist1 = [userLoc getDistanceFrom:poiLoc];
+		NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+		[formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+		[formatter setMaximumFractionDigits:2];
+		[formatter setRoundingMode: NSNumberFormatterRoundHalfUp];
+		
+		NSString *numberString = [formatter stringFromNumber:[NSNumber numberWithFloat:dist1]];
+		
+		[formatter release];
+		//NSLog(@"%@",numberString);
+		
+		if(dist1<999)
+			[dist addObject:[NSString stringWithFormat:@"%@ meter",numberString]];
+		else{
+			
+			float temp;
+			temp=dist1/1000;
+			[dist addObject:[NSString stringWithFormat:@"%.2f KM",temp]];
+			
+		}
+	}
+	
+	//NSLog(@"Sort List Display ID:: %@",dict_SortListDisplay);
+	[tblView reloadData];
+} 
+
+-(void)GDATASortList{	
+	
+    [AlertHandler showAlertForProcess];
+
+	GdataParser *parser1 = [[GdataParser alloc] init];
+	[parser1 downloadAndParse:[NSURL
+							   URLWithString:@"http://www.estatelokaler.no/appservice.php?token=sortby"]
+				  withRootTag:@"post" 
+					 withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"id",@"id",@"sortby",@"sortby",nil]
+						  sel:@selector(finishGetDataSortList:) 
+				   andHandler:self];
+}
+
+-(void)finishGetDataSortList:(NSDictionary*)dictionary{
+    [AlertHandler hideAlert];	
+    NSLog(@"This is dictionary: %@",dictionary);
+	[arrayTypeLokale removeAllObjects];
+	arrayTypeLokale =[[dictionary valueForKey:@"array"] retain];
+	strSortBy=[arrayTypeLokale valueForKey:@"sortby"];
+	NSLog(@"data:: %@",strSortBy);
+	strSortID=[arrayTypeLokale valueForKey:@"id"];
+	selectionStates = [[NSMutableDictionary alloc] init];
+	for (NSString *key in strSortBy)
+		[selectionStates setObject:[NSNumber numberWithBool:NO] forKey:key];
+	
+//	pickerView = [[ALPickerView alloc] initWithFrame:CGRectMake(0.f, 244.f, 0.f, 0.f)];
+//	pickerView.delegate = self;
+//	pickerView.allOption = YES;
+	typeLokalePicker.hidden=FALSE;
+	downPickerToolBar.hidden=FALSE;
+	lblTypeLokale.hidden=FALSE;
+	btnFerdig.hidden=FALSE;
+	
+
+//	[self.view addSubview:pickerView];	
+//	
+//	
+	[typeLokalePicker bringSubviewToFront:self.view];
+//	[pickerView release];
+	[typeLokalePicker reloadData];
+}
+
+-(void)GDATAPropertyOfMon{	
+	//NSLog(@"aa:%@",appdel.appdelStrSearch);
+    [AlertHandler showAlertForProcess];
+    
+	GdataParser *parser2 = [[GdataParser alloc] init];
+	[parser2 downloadAndParse:[NSURL URLWithString:@"http://www.estatelokaler.no/appservice.php?token=propmonth"]
+				  withRootTag:@"post" 
+					 withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"id",@"id",@"title",@"title",@"adress",@"adress",@"houseno",@"houseno",
+							   @"shortDescription",@"shortDescription",@"thumbimage",@"thumbimage",@"area",@"area",@"town",@"town"
+							   ,@"from_area",@"from_area",@"to_area",@"to_area",@"departmentname",@"departmentname",@"companyname",@"companyname",@"latitude",@"latitude",@"longitude",@"longitude",nil]
+						  sel:@selector(finishGetDataPropertyOfMon:) 
+				   andHandler:self];
+}
+
+-(void)finishGetDataPropertyOfMon:(NSDictionary*)dictionary
+{
+    [AlertHandler hideAlert];
+	//NSLog(@"This is dictionary: %@",dictionary);
+	[arrPOM removeAllObjects];
+	arrPOM =[[dictionary valueForKey:@"array"] retain];
+	cnt1=[arrPOM count];
+	for(int i=0;i<[arrPOM count];i++)
+	{
+		dictPOM=[arrPOM objectAtIndex:i];
+		strPropertyID=[[dictPOM valueForKey:@"id"] retain];
+		//NSLog(@"id::%@",strPropertyID);
+	}
+	
+	lblAddHouseNo.text=[NSString stringWithFormat:@"%@, %@",[dictPOM valueForKey:@"adress"],[dictPOM valueForKey:@"title"]];
+	NSString *temp;
+	temp=[NSString stringWithFormat:@"%@-%@Kvm", [dictPOM valueForKey:@"from_area"],[dictPOM valueForKey:@"to_area"]];
+	lblDepartment.text=temp;
+	//lblTitle.text=[dictPOM valueForKey:@"title"];
+	lblDesc.text=[dictPOM valueForKey:@"shortDescription"];
+	lblCompName.text=[dictPOM valueForKey:@"companyname"];
+	//lblTitle.text=[dictPOM valueForKey:@"title"];	
+	//NSLog(@"title:::%@",[dictPOM valueForKey:@"title"]);
+	EGOImageView *imageViewL = [[EGOImageView alloc] initWithPlaceholderImage:[UIImage imageNamed:@"placeholder.png"]];
+	imageViewL.frame = CGRectMake(0.0f, 0.0f, 135.0f,92.0f);
+	[propImg addSubview:imageViewL];
+	
+	[self setLoadImageg:[dictPOM valueForKey:@"thumbimage"]:imageViewL];
+	
+	
+	
+	arrLat=[[arrPOM valueForKey:@"latitude"]retain];
+	arrLong=[[arrPOM valueForKey:@"longitude"]retain];
+	for(int i=0;i<[arrLat count];i++)
+	{
+		
+		NSString *strlat;
+		NSString *strlong;
+		strlat=[arrLat objectAtIndex:i];
+		strlong=[arrLong objectAtIndex:i];
+		CLLocation *poiLoc = [[CLLocation alloc] initWithLatitude: [strlat doubleValue] longitude: [strlong doubleValue]];
+		
+		CLLocation *userLoc = [[CLLocation alloc] initWithLatitude:appdel.lat longitude:appdel.lon];
+		
+		double dist1 = [userLoc getDistanceFrom:poiLoc];
+		NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+		[formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+		[formatter setMaximumFractionDigits:2];
+		[formatter setRoundingMode: NSNumberFormatterRoundHalfUp];
+		
+		NSString *numberString = [formatter stringFromNumber:[NSNumber numberWithFloat:dist1]];
+		
+		[formatter release];
+		//NSLog(@"%@",numberString);
+		
+		if(dist1<999)
+			appdel.strDistance=[NSString stringWithFormat:@"%@ meter",numberString];
+			
+		else{
+			
+			float temp;
+			temp=dist1/1000;
+			appdel.strDistance=[NSString stringWithFormat:@"%.2f KM",temp];
+			
+		}
+	}
+	promonthView.hidden=NO;
+	[promonthView bringSubviewToFront:self.view];
+	
+}
+
+-(IBAction)clickClose
+{
+	[promonthView setFrame:CGRectMake(0, 470, 320, 100)];
+}
+-(void)setLoadImageg:(NSString*)loadimage:(EGOImageView*)img{
+	
+	img.imageURL = [NSURL URLWithString:loadimage];
+}
+
+
+#pragma mark -
+#pragma mark Table view data source
+
+ //Customize the number of sections in the table view.
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+
+// Customize the number of rows in the table view.
+- (NSInteger)tableView:(UITableView *)tblView numberOfRowsInSection:(NSInteger)section {
+	if (appdel.flagOfTwelve==1){
+		
+		return [arrayTwelveData  count];
+	}
+	else if (appdel.flagFilter==1) {
+		return [appdel.appdel_ArrayFilterBack count];
+	}
+	else if (appdel.flagFilter==2){
+		return [appdel.currentArray count];
+	}
+	
+	else if (appdel.flagsokSearch==1){
+		return [searchArray count];
+	}
+	else if(appdel.flagOfPremises==1){
+		return [appdel.arrayPremises count];	
+	}
+	else{
+		return [appdel.arrList count];
+	}	
+}
+
+- (CGFloat)tableView:(UITableView *)tblView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+	return 100;	
+}
+
+// Customize the appearance of table view cells.
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+		
+//	PropertyListModeCell *cell = [PropertyListModeCell dequeOrCreateInTable:tableView];
+//	EGOImageView *imageViewL = [[EGOImageView alloc] initWithPlaceholderImage:[UIImage imageNamed:@"placeholder.png"]];
+//	imageViewL.frame = CGRectMake(6.0f, 5.0f, 87.0f, 89.0f);
+//	cell.imgView.hidden = TRUE;
+//	[cell.contentView addSubview:imageViewL];
+	static NSString *CellIdentifier = @"PropertyListModeCell";
+    
+    PropertyListModeCell *cell = (PropertyListModeCell *)[tableView dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {            
+        NSArray *nib = nil;        
+		nib = [[NSBundle mainBundle] loadNibNamed:@"PropertyListModeCell" owner:nil options:nil];
+        cell = [nib objectAtIndex:0];    
+		      
+        imageViewL = [[EGOImageView alloc] initWithPlaceholderImage:[UIImage imageNamed:@"placeholder.png"]];
+        imageViewL.frame = CGRectMake(6.0f, 24.0f, 87.0f, 70.0f);
+        cell.imgView.hidden = TRUE;
+        [cell.contentView addSubview:imageViewL];
+        
+    }
+	
+	if (appdel.flagOfTwelve==1) {
+		dict_twelveData=[arrayTwelveData objectAtIndex:indexPath.row];
+		if([dist count]>0)
+			cell.lblAvstand.text=[NSString stringWithFormat:@"Avstand:%@",[dist objectAtIndex:indexPath.row]];
+
+		[self setLoadImageg:[dict_twelveData valueForKey:@"mainimage"]:imageViewL];
+		[cell setData:dict_twelveData];
+	}
+	
+	else if (flagSortListDisplay==1) {
+		dict_SortListDisplay=[arraySortListDisplay objectAtIndex:indexPath.row];
+		if([dist count]>0)
+			cell.lblAvstand.text=[NSString stringWithFormat:@"Avstand:%@",[dist objectAtIndex:indexPath.row]];
+
+		[self setLoadImageg:[dict_SortListDisplay valueForKey:@"mainimage"]:imageViewL];
+		[cell setData:dict_SortListDisplay];
+	}
+	
+	else if (appdel.flagFilter==1) {
+		appdel.appdel_dicFilterBack=[appdel.appdel_ArrayFilterBack objectAtIndex:indexPath.row];
+		if([arrDistance count]>0)
+			cell.lblAvstand.text=[NSString stringWithFormat:@"Avstand:%@",[arrDistance objectAtIndex:indexPath.row]];
+
+		[self setLoadImageg:[appdel.appdel_dicFilterBack valueForKey:@"mainimage"]:imageViewL];
+		[cell setData: appdel.appdel_dicFilterBack];
+		
+	}
+	else if (appdel.flagFilter==2){
+		appdel.appdel_dicFilterSave=[appdel.currentArray objectAtIndex:indexPath.row];
+		if([arrDistance count]>0)
+			cell.lblAvstand.text=[NSString stringWithFormat:@"Avstand:%@",[arrDistance objectAtIndex:indexPath.row]];
+
+		[self setLoadImageg:[appdel.appdel_dicFilterSave valueForKey:@"mainimage"]:imageViewL];
+		[cell setData: appdel.appdel_dicFilterSave];
+	}
+	
+	
+	else if (appdel.flagsokSearch==1){
+		
+		
+		dict_SokSearch=[searchArray objectAtIndex:indexPath.row];
+		if([dist count]>0)
+			cell.lblAvstand.text=[NSString stringWithFormat:@"Avstand:%@",[dist objectAtIndex:indexPath.row]];
+
+		[self setLoadImageg:[dict_SokSearch valueForKey:@"mainimage"] :imageViewL];
+		[cell setData:dict_SokSearch];
+	}
+	else if(appdel.flagOfPremises==1)
+	{
+		
+		appdel.dicPremises=[appdel.arrayPremises objectAtIndex:indexPath.row];
+			//NSLog(@"Premises At Cell::::%@",appdel.dicPremises);
+		if([dist count]>0)
+			cell.lblAvstand.text=[NSString stringWithFormat:@"Avstand:%@",[dist objectAtIndex:indexPath.row]];
+
+		[self setLoadImageg:[appdel.dicPremises valueForKey:@"mainimage"]:imageViewL];
+		[cell setData: appdel.dicPremises];	
+	}
+	else{
+		_dict =[appdel.arrList objectAtIndex:indexPath.row];
+        
+       
+		if([dist count]>0)
+        {
+       //     float temp = ;
+       //     NSLog(@"In Table Deleg %f",temp);
+            cell.lblAvstand.text=[NSString stringWithFormat:@"Avstand:%@",[dist objectAtIndex:indexPath.row]];
+		}
+        [self setLoadImageg:[_dict valueForKey:@"mainimage"]:imageViewL];
+		[cell setData: _dict];		
+	}
+	
+	return cell; 
+}
+
+#pragma mark -
+#pragma mark Table view delegate
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    PropertiesDetailVC *detailViewController = [[PropertiesDetailVC alloc] initWithNibName:@"PropertiesDetailVC" bundle:nil];
+  
+		if (appdel.flagOfTwelve==1) {
+		dict_twelveData=[arrayTwelveData objectAtIndex:indexPath.row];
+		strTmp=[dict_twelveData valueForKey:@"id"];
+		appdel.strDistance=[dist objectAtIndex:indexPath.row];
+			
+		appdel.currentDict=dict_twelveData;
+	}
+	else if (flagSortListDisplay==1) {
+		dict_SortListDisplay=[arraySortListDisplay objectAtIndex:indexPath.row];
+		appdel.strDistance=[dist objectAtIndex:indexPath.row];
+		strTmp=[dict_SortListDisplay valueForKey:@"id"];
+		appdel.currentDict=dict_SortListDisplay;
+	}
+	else if (appdel.flagFilter==1) {
+		appdel.appdel_dicFilterBack=[appdel.appdel_ArrayFilterBack objectAtIndex:indexPath.row];
+		strTmp=[appdel.appdel_dicFilterBack valueForKey:@"id"];
+		appdel.strDistance=[dist objectAtIndex:indexPath.row];
+		appdel.currentDict=appdel.appdel_dicFilterBack;
+	}	
+	else if (appdel.flagFilter==2){
+		appdel.appdel_dicFilterSave=[appdel.appdel_ArrayFilterSave objectAtIndex:indexPath.row];
+		strTmp=[appdel.appdel_dicFilterSave valueForKey:@"id"];
+		appdel.strDistance=[dist objectAtIndex:indexPath.row];
+		appdel.currentDict=appdel.appdel_dicFilterSave;
+	}
+	else if (appdel.flagsokSearch==1){
+		dict_SokSearch=[searchArray objectAtIndex:indexPath.row];
+		strTmp=[dict_SokSearch valueForKey:@"id"];
+		//appdel.strDistance=[dist objectAtIndex:indexPath.row];
+		appdel.currentDict=dict_SokSearch;
+	}
+	else if(appdel.flagOfPremises==1)
+	{
+		appdel.dicPremises=[appdel.arrayPremises objectAtIndex:indexPath.row];
+		strTmp=[appdel.dicPremises valueForKey:@"id"];
+		appdel.strDistance=[dist objectAtIndex:indexPath.row];	
+		appdel.currentDict=appdel.dicPremises;
+	}
+	else{
+		_dict =[appdel.arrList objectAtIndex:indexPath.row];
+		appdel.strDistance=[dist objectAtIndex:indexPath.row];
+
+		strTmp=[_dict valueForKey:@"id"];
+		appdel.currentDict=_dict;
+    }
+	
+	appdel.appdelStrID=strTmp;  
+    //NSLog(@"list mode id %@",appdel.appdelStrID);
+    [self.navigationController pushViewController:detailViewController animated:YES];
+	//[detailViewController release];
+}
+
+#pragma mark -
+#pragma mark UIMkMapView delegate methods
+
+
+
+-(IBAction)clickProperty{
+	objPropertyDetailVC = [[PropertiesDetailVC alloc] initWithNibName:@"PropertiesDetailVC" bundle:nil];
+	
+	appdel.appdelStrID= strPropertyID;
+	//NSLog(@"strID::%@",appdel.appdelStrID);
+	
+	[self.navigationController pushViewController:objPropertyDetailVC animated:YES];
+}
+
+
+- (void)addGestureRecognizersToPiece:(UIView *)piece
+{
+	UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(handleDoubleTap:)];
+    [piece addGestureRecognizer:tapGesture];
+    [tapGesture release];
+}
+
+
+
+- (CLLocationCoordinate2D)convertPoint:(CGPoint)point toCoordinateFromView:(UIView *)view
+{
+    CLLocationCoordinate2D location;
+    
+    location.latitude = point.x;
+    location.longitude = point.y;
+	
+    return location;
+}
+
+- (void)handleDoubleTap:(UIGestureRecognizer *)gestureRecognizer
+{
+   CGPoint a  = [gestureRecognizer locationInView:_mapView];
+	
+    MKCoordinateRegion region;
+    MKCoordinateSpan span;
+    region.center = [_mapView convertPoint:a toCoordinateFromView:_mapView];
+    span.latitudeDelta=_mapView.region.span.latitudeDelta/6;
+    span.longitudeDelta=_mapView.region.span.longitudeDelta/6;
+    region.span=span;
+    
+    [_mapView setRegion:region animated:TRUE];
+}
+
+//- (void)handleDoubleTap:(UIGestureRecognizer *)gestureRecognizer
+//{
+//    MKCoordinateRegion region;
+//    MKCoordinateSpan span;
+//    region.center=_mapView.region.center;
+//    
+//    
+//    span.latitudeDelta=_mapView.region.span.latitudeDelta/4;
+//    span.longitudeDelta=_mapView.region.span.longitudeDelta/4;
+//    region.span=span;
+//    
+//    [_mapView setRegion:region animated:TRUE];
+//}
+
+#pragma mark -
+#pragma mark Picker View Methods
+
+//- (NSInteger)numberOfRowsForPickerView:(ALPickerView *)thePickerView {
+//	return [arrayTypeLokale count];
+//}
+//- (NSString *)pickerView:(ALPickerView *)thePickerView textForRow:(NSInteger)row {
+//	
+//	NSMutableArray *arr;
+//	arr=[arrayTypeLokale valueForKey:@"sortby"];
+//	NSLog(@"array::%@",arr);
+//	NSLog(@"SortBy::%@",[arr objectAtIndex:row]);
+//	//for (int i=0; i<[strSortBy count]; i++) {
+//	return [arr objectAtIndex:row];	
+//	
+//}
+//
+//- (BOOL)pickerView:(ALPickerView *)thePickerView selectionStateForRow:(NSInteger)row {
+//	return [[selectionStates objectForKey:[arrayTypeLokale objectAtIndex:row]] boolValue];
+//}
+//- (void)pickerView:(ALPickerView *)thePickerView didCheckRow:(NSInteger)row {
+//	if (row == -1){
+//	}
+//		else{
+//		//[selectionStates setObject:[NSNumber numberWithBool:YES] forKey:[arrayTypeLokale objectAtIndex:row]];
+//		[strSortID addObject:[NSString stringWithFormat:@"%@",[strSortID objectAtIndex:row]]];
+//		
+////		[filterArr addObject:[arrayTypeLokale objectAtIndex:row]];
+////		for (int i=0; i<[filterArr count]; i++) {
+////			lblSort=[[NSString stringWithFormat:@"%@%@,",lblSort,[filterArr objectAtIndex:i]]retain];	
+//		}
+//}
+//
+- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)thePickerView {
+	return 1;
+}
+
+- (NSInteger)pickerView:(UIPickerView *)thePickerView numberOfRowsInComponent:(NSInteger)component {
+	
+	return [arrayTypeLokale count];
+}
+
+- (NSString *)pickerView:(UIPickerView *)thePickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component {
+	strSortBy=[arrayTypeLokale valueForKey:@"sortby"];
+		return [strSortBy objectAtIndex:row ];
+}
+    
+- (void)pickerView:(UIPickerView *)thePickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component {
+	NSString *tmp;
+	selrow =row;
+	//NSLog(@"%@",row.view); 
+	strSortBy=[arrayTypeLokale valueForKey:@"sortby"];
+	tmp=[strSortBy	objectAtIndex:row];
+	lblSort.text=tmp;
+	//NSLog(@"Selected Color: %@. Index of selected color: %i", [arrayTypeLokale objectAtIndex:row], row);
+	strSortID=[arrayTypeLokale objectAtIndex:row],row ; 
+	
+	appdel.appdelStrSortID=[strSortID valueForKey:@"id"];
+	[thePickerView reload];
+	//dict_SortListDisplay=[arraySortListDisplay objectAtIndex:indexPath.row];	
+	//[cell setData:dict_SortListDisplay];
+	//[self GDATASortListDisplay];
+	//NSLog(@"appdel strID::%@",appdel.appdelStrSortID);
+}
+
+- (UIView *)pickerView:(UIPickerView *)pickerView
+			viewForRow:(NSInteger)row
+		  forComponent:(NSInteger)component
+		   reusingView:(UIView *)view {
+	UIView *customView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 290, 20)];
+	//customView.backgroundColor=[UIColor yellowColor];
+	UILabel *pickerLabelLeft = [[UILabel alloc] initWithFrame:CGRectMake(30, 0.0, 180, 20)];
+	[pickerLabelLeft setTextAlignment:UITextAlignmentLeft];
+	pickerLabelLeft.font=[UIFont boldSystemFontOfSize:11];
+	pickerLabelLeft.backgroundColor = [UIColor clearColor];
+	[pickerLabelLeft setText:[NSString stringWithFormat:@"%@",[[arrayTypeLokale valueForKey:@"sortby"]objectAtIndex:row]]];
+	UIButton *btnCheck = [UIButton buttonWithType:UIButtonTypeCustom];
+	btnCheck.frame = CGRectMake(5, 0, 15, 15);
+	if(row==selrow){	
+	[btnCheck setBackgroundImage:[UIImage imageNamed:@"check.png"] forState:UIControlStateNormal];
+		//
+		pickerLabelLeft.textColor = [UIColor orangeColor];		//[btnCheck setTag:tagChar];
+	}
+	else {
+		[btnCheck setBackgroundImage:[UIImage imageNamed:@""] forState:UIControlStateNormal];
+	}
+
+	[customView addSubview:pickerLabelLeft];
+	[customView addSubview:btnCheck];
+	
+	return customView;
+	[pickerLabelLeft release];
+	[customView release];
+	[btnCheck release];
+}
+//-(void)clickSelect:(id)sender{
+//	NSLog(@"Hello");	
+//}
+#pragma mark -
+#pragma mark custom methods
+-(void)setToolBarFrames{
+	
+	[typeLokalePicker setFrame:CGRectMake(0, 470, 320, 216)];
+	[downPickerToolBar setFrame:CGRectMake(0, 514, 320, 44)];
+	[lblTypeLokale setFrame:CGRectMake(50, 519, 155, 21)];
+	[btnFerdig setFrame:CGRectMake(240, 514, 72, 33)];
+}
+
+-(void)clickBack
+{
+	if(appdel.flagOfTwelve==1){
+		[self GdataUpdate];
+		
+	}
+	appdel.flagDetailVC=2;
+	[self.navigationController popViewControllerAnimated:YES];
+}
+-(void)GdataUpdate{
+	
+	NSString *urlstring=[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=updatesearch&udid=%@",appdel.udID];
+    [AlertHandler showAlertForProcess];
+
+	//NSLog(@"aa:%@",appdel.appdelStrSearch);
+	GdataParser *parserPremises= [[GdataParser alloc] init];
+	[parserPremises downloadAndParse:[NSURL URLWithString:[urlstring stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]
+						 withRootTag:@"updatesearch"
+							withTags:[NSDictionary dictionaryWithObjectsAndKeys:nil]
+								 sel:@selector(finishGdataUpdate:)
+						  andHandler:self];
+}
+
+-(void)finishGdataUpdate:(NSDictionary*)dictionary{
+    [AlertHandler hideAlert];
+}
+
+-(void)clickSokeFilter
+{
+	[_mapView removeFromSuperview];
+	_mapView = nil;
+	[_mapView release];
+	SokeFilterVC *detailViewController = [[SokeFilterVC alloc] initWithNibName:@"SokeFilterVC" bundle:nil];
+	[self.navigationController pushViewController:detailViewController animated:YES];
+	[detailViewController release];
+}
+
+-(IBAction)clickSortList
+{
+	[self GDATASortList];
+	[UIView beginAnimations:nil context:nil];
+	[UIView setAnimationDuration:0.5];
+	typeLokalePicker.hidden=TRUE;
+	[typeLokalePicker setFrame:CGRectMake(0, 244, 320, 216)];
+
+	[downPickerToolBar setFrame:CGRectMake(0, 200, 320, 44)];
+	[lblTypeLokale setFrame:CGRectMake(50, 212, 155, 21)];
+	[btnFerdig setFrame:CGRectMake(240, 208, 72, 33)];
+	[UIView commitAnimations];
+}
+
+-(void)clickFerdig
+{	
+	[self GDATASortListDisplay];
+		[UIView beginAnimations:nil context:nil];
+	[UIView setAnimationDuration:0.5];
+	[self setToolBarFrames];
+	[UIView commitAnimations];
+}
+-(IBAction)clickList
+{	
+	//[_mapView removeFromSuperview];
+	_mapView.hidden =YES;
+	mapView.hidden =YES;
+	MapView.hidden =YES;
+	listView.hidden =NO;
+	tblView.hidden=NO;
+//	btnBack.hidden=FALSE;
+	//	[listView bringSubviewToFront:self.view];
+	
+	imgSegKart.image=[UIImage imageNamed:@"topBarlist.png"];
+	listView.userInteractionEnabled =YES;
+}
+
+-(IBAction)clickKart{
+	
+	[self getMapannotation:appdel.currentArray];
+		_mapView.hidden =NO;
+	mapView.hidden =NO;
+	MapView.hidden =NO;
+	listView.hidden =YES;
+	mapView.userInteractionEnabled =YES;
+	imgSegKart.image=[UIImage imageNamed:@"topBarKart.png"];	
+//	btnBack.hidden=TRUE;
+	
+}
+
+-(void)getMapannotation: (NSMutableArray *)arr{
+	if([arr count]==0)
+		return;
+	_mapView = [[REVClusterMapView alloc] initWithFrame:CGRectMake(0,0, 320, 480)];
+    _mapView.delegate = self;
+	[MapView addSubview:_mapView];
+	//[_mapView removeAnnotations:];
+	CLLocationCoordinate2D coordinate;
+    coordinate.latitude = [[[arr objectAtIndex:0] valueForKey:@"latitude"] floatValue];
+    coordinate.longitude = [[[arr  objectAtIndex:0] valueForKey:@"longitude"] floatValue];
+	_mapView.region = MKCoordinateRegionMakeWithDistance(coordinate, 500000, 500000);    
+	NSMutableArray *pinsArray = [NSMutableArray array];
+    
+    for(int i=0;i<[arr count];i++) {
+		
+		CGFloat lat = [[[arr  objectAtIndex:i] valueForKey:@"latitude"] floatValue];
+		CGFloat lng = [[[arr objectAtIndex:i] valueForKey:@"longitude"] floatValue];
+		
+        CLLocationCoordinate2D newCoord = {lat,lng};
+        REVClusterPin *pin = [[REVClusterPin alloc] init];
+		pin.title = [NSString stringWithFormat:@"%@",[[arr objectAtIndex:i] valueForKey:@"title"]];
+		pin.pinid=[NSString stringWithFormat:@"%@",[[arr objectAtIndex:i]valueForKey:@"id"]];
+		
+		//pin.title = [NSString stringWithFormat:@"Pin %i title:%@",i+1,[[appdel.arrList objectAtIndex:i] valueForKey:@"title"]];
+		// pin.subtitle = [NSString stringWithFormat:@"Pin %i subtitle : %@",i+1,[[appdel.arrList objectAtIndex:i] valueForKey:@"adress"]];
+		
+		pin.coordinate = newCoord;
+		[pinsArray addObject:pin];
+        [pin release]; 
+    }
+    
+    [_mapView addAnnotations:pinsArray];
+	
+}
+
++ (BOOL) clusterAlreadyExistsForMapView:(MKMapView *)mapView andBlockCluster:(REVClusterBlock *)cluster
+{
+    
+    
+}
+
+-(void)mapView:(MKMapView *)mapView didSelectAnnotationView:(MKAnnotationView *)view
+{
+    
+	REVClusterPin *sle=view.annotation;
+	appdel.appdelStrID=sle.pinid;
+    NSLog(@"did select%@",sle.pinid);
+   
+	
+	// objappdel.strscienceaddname=sle.title;
+
+}
+
+-(MKAnnotationView *)mapView:(MKMapView *)mV viewForAnnotation:
+(id <MKAnnotation>)annotation {
+	//MKPinAnnotationView *annView = nil; 
+	
+	if([annotation class] == MKUserLocation.class) {
+		//userLocation = annotation;
+		return nil;
+	}
+    
+    REVClusterPin *pin = (REVClusterPin *)annotation;
+    
+    MKAnnotationView *annView;
+    
+    if( [pin nodeCount] > 0 ){
+        annView = (REVClusterAnnotationView*)[mV dequeueReusableAnnotationViewWithIdentifier:@"cluster"];
+        
+        if( !annView )
+            annView = (REVClusterAnnotationView*)[[[REVClusterAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@"cluster"] autorelease];
+        
+        annView.image = [UIImage imageNamed:@"marker_w_number.png"];
+        
+       [(REVClusterAnnotationView*)annView setClusterText:[NSString stringWithFormat:@"%i",[pin nodeCount]]];
+        
+        [(REVClusterAnnotationView*)annView setEnabled:YES];
+        
+        
+        [(REVClusterAnnotationView*)annView setExclusiveTouch:YES];
+        //[annView setGestureRecognizers:appdel.currentArray];
+        [(REVClusterAnnotationView*)annView setIsAccessibilityElement:YES];
+        [(REVClusterAnnotationView*)annView setMultipleTouchEnabled:YES];
+        [(REVClusterAnnotationView*)annView setUserInteractionEnabled:YES];
+        
+        
+        annView.canShowCallout = YES;
+        [annView setEnabled:YES];
+        
+        [self addGestureRecognizersToPiece:annView];
+    } else {
+        annView = [mV dequeueReusableAnnotationViewWithIdentifier:@"pin"];
+        
+        if( !annView )
+            annView = [[[MKAnnotationView alloc] initWithAnnotation:annotation reuseIdentifier:@"pin"] autorelease];
+        
+        annView.image = [UIImage imageNamed:@"marker_property.png"];
+        annView.canShowCallout = YES; 
+		[annView setEnabled:YES];
+			
+		NSString *pintitle=[NSString stringWithFormat:@"%@",((MKPinAnnotationView*) annView).annotation.title];
+		//NSLog(@"PinTitle:::%@ \n StrAddress:::%@",pintitle,strAddress);
+		for (int i = 0; i<[appdel.currentArray count]; i++)
+		{
+			d = (NSMutableDictionary*)[appdel.currentArray objectAtIndex:i];
+			//NSLog(@"%@",[d valueForKey:@"id"]);
+			strAddress = [NSString stringWithFormat:@"%@",[d valueForKey:@"title"]];
+			
+			if([strAddress isEqualToString:pintitle]) 
+			{
+				//annot = object;
+				d = [appdel.currentArray objectAtIndex:i];
+				UIImageView *imageview =[[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 45, 30)];
+				imgURL= [[NSURL	alloc] initWithString:[d objectForKey:@"mainimage"]]; 
+				imageview.image = [UIImage imageWithData:[NSData dataWithContentsOfURL:imgURL]];
+				annView.leftCalloutAccessoryView =imageview;				 
+				//appdel.appdelStrID = [d objectForKey:@"id"];
+				
+				UIButton *infoButton = [UIButton buttonWithType:UIButtonTypeCustom];
+				[infoButton setFrame:CGRectMake(annView.bounds.size.width-35,10,25, 27)];
+				infoButton.tag=[[d objectForKey:@"id"] intValue];
+				[infoButton setImage:[UIImage imageNamed:@"DDOrange.png"] forState:UIControlStateNormal];
+				annView.rightCalloutAccessoryView = infoButton;
+				[infoButton addTarget:self action:@selector(ButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+				
+				[imageview release];
+				break;
+			}
+		
+		
+
+				}
+    }
+    return annView;
+}
+-(void)ButtonPressed:(id)sender{
+	
+	NSLog(@"appdel%@",appdel.appdelStrID);
+	UIButton *bt = (UIButton *)sender;	
+		
+	appdel.isDetail=TRUE;
+	if (objPropertyDetailVC!=nil) {
+		[objPropertyDetailVC release];
+	}
+	objPropertyDetailVC = [[PropertiesDetailVC alloc] initWithNibName:@"PropertiesDetailVC" bundle:nil];
+	//NSString *strSearchId=[NSString stringWithFormat:@"%d",[sender tag]];   //[_dict valueForKey:@"id"];
+	//appdel.appdelStrID=strSearchId;  
+
+	[self.navigationController pushViewController:objPropertyDetailVC animated:YES];
+	// [detailViewController release];	
+}
+- (void)didReceiveMemoryWarning {
+    // Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+    
+    // Release any cached data, images, etc. that aren't in use.
+}
+- (void)viewDidUnload {
+    [super viewDidUnload];
+    // Release any retained subviews of the main view.
+    // e.g. self.myOutlet = nil;
+}
+- (void)dealloc {
+	[super dealloc];
+	if (selectionStates!=nil) {
+		selectionStates=nil;
+		[selectionStates release];
+	}
+	
+	if (arrayTypeLokale !=nil) {
+		arrayTypeLokale=nil;
+		[arrayTypeLokale release];
+	}
+	if (strSortBy !=nil) {
+		strSortBy=nil;
+		[strSortBy release];
+	}
+	if (strTmp !=nil) {
+		strTmp=nil;
+		[strTmp release];
+	}
+	
+	
+	if (strSortID !=nil) {
+		strSortID=nil;
+		[strSortID release];
+	}
+	if (arraySortListDisplay !=nil) {
+		arraySortListDisplay=nil;
+		[arraySortListDisplay release];
+	}
+	if (arrayTwelveData !=nil) {
+		arrayTwelveData=nil;
+		[arrayTwelveData release];
+	}
+	if (searchArray !=nil) {
+		searchArray=nil;
+		[searchArray release];
+	}
+	if (arrLatSokSearch !=nil) {
+		arrLatSokSearch=nil;
+		[arrLatSokSearch release];
+	}
+	if (arrLongSokSearch !=nil) {
+		arrLongSokSearch=nil;
+		[arrLongSokSearch release];
+	}
+	
+	if (arrTitleSokSearch !=nil) {
+		arrTitleSokSearch=nil;
+		[arrTitleSokSearch release];
+	}
+	if (dist !=nil) {
+		dist=nil;
+		[dist release];
+	}
+
+	[arrLat release];
+	[arrLong release];
+	[arrPOM release];
+	
+	[objPropertyDetailVC release];
+	
+	[MapView release];
+	[listView release];
+	[mapView release];
+	[tblView release];
+	[promonthView release];
+	
+	[typeLokalePicker release];
+	[downPickerToolBar release];
+	[lblTypeLokale release];
+	//[lblAreal release];
+	[lblTitleSoq release];
+	[lblSort release];
+	[lblCount release];
+	
+	[btnFerdig release];
+	[btnFilter release];
+	[btnAreal release]; 
+	
+	[imgSegKart release];
+	
+	[seg release];
+	
+	[strPropertyID release];
+	
+}
+
+
+@end

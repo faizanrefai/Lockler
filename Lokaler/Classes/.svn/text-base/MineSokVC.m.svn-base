@@ -1,0 +1,783 @@
+//
+//  MineSokVC1.m
+//  EstateLokaler
+//
+//  Created by apple  on 9/29/11.
+//  Copyright 2011 hjbvb. All rights reserved.
+//
+
+#import "MineSokVC.h"
+#import "EstateLokalerAppDelegate.h"
+#import "GdataParser.h"
+#import "MineSokCell.h"
+#import "MineFunnVC.h"
+#import "SokeFilterVC.h"
+#import "MineFunnCell.h"
+#import "PropertiesDetailVC.h"
+#import "PropertyListMode.h"
+#import "UITableViewCell+NIB.h"
+#import "AlertHandler.h"
+
+
+@implementation MineSokVC
+//@synthesize _dict,dictTown,dictArea,dictDept,dictExtra,dictCntProp;
+//@synthesize strTempDept,strTempTown,strTempArea;
+//@synthesize arrAppTownID,arrAppAreaID,arrTown,arrAreaName;
+//@synthesize arrTownName,arrSplitArea,arrDeptName,arrSplitDept,arrSearchId;
+//@synthesize arrCntProp,arrSplitTown,arrAppDeptID;
+
+
+- (void)viewDidLoad {
+	[super viewDidLoad];
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+	count1=0;
+	tempComplete=0;
+	strTempDelID=[[NSString alloc]init];
+	_dict=[[NSMutableDictionary alloc]init];
+	arrAppTownID=[[NSMutableArray alloc]init];
+	arrAppAreaID=[[NSMutableArray alloc]init];
+	arr=[[NSMutableArray alloc]init];
+	arrTown=	 [[NSMutableArray alloc]init];
+	arrTownName= [[NSMutableArray alloc]init];
+	arrSplitArea=[[NSMutableArray alloc]init];
+	arrAreaName= [[NSMutableArray alloc]init];
+	arrDeptName= [[NSMutableArray alloc]init];
+	arrSplitDept=[[NSMutableArray alloc]init];
+	arrAppDeptID=[[NSMutableArray alloc]init];
+	arrSearchId= [[NSMutableArray alloc]init];
+	arrCntProp=  [[NSMutableArray alloc]init];
+	arrSplitTown=[[NSMutableArray alloc]init];
+	
+	dictTown=[[NSMutableDictionary alloc]init];
+	dictArea=[[NSMutableDictionary alloc]init];
+	dictDept=[[NSMutableDictionary alloc]init];
+	dictExtra=[[NSMutableDictionary alloc]init];
+	appdel=(EstateLokalerAppDelegate *)[[UIApplication sharedApplication]delegate];
+	appdel.isAlert=FALSE;
+
+	[self GDATA];
+}
+
+/*
+ // Override to allow orientations other than the default portrait orientation.
+ - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+ // Return YES for supported orientations.
+ return (interfaceOrientation == UIInterfaceOrientationPortrait);
+ }
+ */
+
+-(void)GDATA{	
+	
+    [AlertHandler showAlertForProcess];
+    
+	GdataParser *parser = [[GdataParser alloc] init];
+    
+	[parser downloadAndParse:[NSURL
+							  URLWithString:[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=getsearch&udid=%@",appdel.udID]]
+				 withRootTag:@"post" 
+					withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"id",@"id",@"udid",@"udid",
+							  @"town_id",@"town_id",@"area_id",@"area_id",@"department_id",@"department_id",
+							  @"from_area",@"from_area",@"to_area",@"to_area",@"date_insert",@"date_insert",
+							  @"category_id",@"category_id",@"date_insert",@"date_insert",nil]
+						
+						 sel:@selector(finishGetData:)
+				  andHandler:self]; 
+	
+}
+
+-(void)finishGetData:(NSDictionary*)dictionary{
+	//[arrTown removeAllObjects];
+	//[appdel.arrList removeAllObjects];
+    
+    [AlertHandler hideAlert];
+
+	appdel.arrList=[[dictionary valueForKey:@"array"]retain];
+	_dict =[dictionary valueForKey:@"array"];
+	//NSLog(@"dict is %@",_dict);
+	//NSLog(@"array::::%@",appdel.arrList);
+	
+	arrSearchId=[[_dict valueForKey:@"id"]retain];
+	arrTown=[[_dict valueForKey:@"town_id"] retain];
+	//NSLog(@"DictionaryJjjjjjjjj is%@",arrSearchId);
+	
+	//NSLog(@"Townid %@",[appdel.arrList valueForKey:@"town_id"]);
+	if([appdel.arrList count]!=0)
+	{
+
+		_dictCNT =[appdel.arrList objectAtIndex:count1];
+		strCntProp=[_dictCNT valueForKey:@"id"];
+		[self GDATACntProp];
+		count1++;
+		
+	}
+		//[arr addObject:[NSString stringWithFormat:@"%@",strCntProp]];
+//		NSLog(@"ttttttttttt %@",arr);
+	
+	
+	
+	[self GDATATown];
+	
+}
+-(void)GDATACntProp{
+	
+	
+	
+	GdataParser *parser20 = [[GdataParser alloc] init];
+	[parser20 setLoading:TRUE];
+	[parser20 downloadAndParse:[NSURL  URLWithString:[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=getindsearchcount&udid=%@&searchid=%@",appdel.udID,strCntProp]]
+	 
+				   withRootTag:@"post" 
+					  withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"cnt",@"cnt",nil]
+						   sel:@selector(finishGetDataCntProp:) 
+					andHandler:self];
+	
+}
+
+-(void)finishGetDataCntProp:(NSDictionary*)dictionary{
+	
+	dictCntProp=[dictionary valueForKey:@"array"];
+	NSMutableArray *t_val=[dictionary valueForKey:@"array"];
+	
+	arrCntProp=[[t_val valueForKey:@"cnt"]retain];
+	//NSLog(@"cont of property is %@",dictionary);
+	for(int i =0;i<[t_val count];i++)
+		[arr addObject:[arrCntProp objectAtIndex:i]];
+	//NSLog(@"appdel array::%d",[appdel.arrList count]);
+	
+	if([appdel.arrList count]>count1)
+	{
+		
+		_dictCNT =[appdel.arrList objectAtIndex:count1];
+		strCntProp=[_dictCNT valueForKey:@"id"];
+		count1++;
+		[self GDATACntProp];
+	}
+	else {
+		tempComplete=1;
+		[myTable reloadData];
+	}
+	//NSLog(@"arrr:::%d",[arr count]);
+	//NSLog(@"arrr1:::%@",arrCntProp);
+	
+}
+
+
+-(void)GDATATown{	
+	
+	GdataParser *parser1 = [[GdataParser alloc] init];
+	[parser1 downloadAndParse:[NSURL  URLWithString:@"http://www.estatelokaler.no/appservice.php?token=flyke"]
+	 
+				 withRootTag:@"post" 
+					withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"townid",@"townid",@"town",@"town",nil]
+						 sel:@selector(finishGetDataTown:) 
+				  andHandler:self];
+}
+
+-(void)finishGetDataTown:(NSDictionary*)dictionary{
+	//NSLog(@"This is dictionary:of town %@",dictionary);
+	
+	
+	dictTown =[[dictionary valueForKey:@"array"] retain];
+	arrAppTownID=[[dictTown valueForKey:@"townid"]retain];
+	arrTownName=[[dictTown valueForKey:@"town"]retain];
+	cntTown=[arrTownName count];
+	
+	//NSLog(@"town dict^^^^^  id is%d",cntTown);
+	[self GDATAArea];
+	
+}
+-(void)GDATAArea{	
+	
+	GdataParser *parser2 = [[GdataParser alloc] init];
+	[parser2 downloadAndParse:[NSURL  URLWithString:@"http://www.estatelokaler.no/appservice.php?token=kommune"]
+	 
+				 withRootTag:@"post" 
+					withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"areaid",@"areaid",@"area",@"area",nil]
+						 sel:@selector(finishGetDataArea:) 
+				  andHandler:self];
+}
+
+-(void)finishGetDataArea:(NSDictionary*)dictionary{
+	//NSLog(@"This is dictionary: of area%@",dictionary);
+	//[arrAreaName removeAllObjects];
+	//[arrAppAreaID removeAllObjects];
+	dictArea =[[dictionary valueForKey:@"array"] retain];
+	arrAppAreaID=[[dictArea valueForKey:@"areaid"]retain];
+	
+	arrAreaName=[[dictArea valueForKey:@"area"]retain];
+	cntArea=[arrAppAreaID count];
+	
+	//NSLog(@"Area  id is%d",cntArea);
+	
+	[self GDATADept];
+}
+     
+-(void)GDATADept{	
+	
+	GdataParser *parser3 = [[GdataParser alloc] init];
+	[parser3 downloadAndParse:[NSURL  URLWithString:@"http://www.estatelokaler.no/appservice.php?token=typelokale"]
+	 
+				  withRootTag:@"post" 
+					 withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"deptid",@"deptid",@"department",@"department",nil]
+						  sel:@selector(finishGetDataDept:) 
+				   andHandler:self];
+}
+
+-(void)finishGetDataDept:(NSDictionary*)dictionary{
+	//[arrDeptName removeAllObjects];
+	//NSLog(@"This is dictionary: of area%@",dictionary);
+	[arrAppDeptID removeAllObjects];
+	
+	dictDept =[[dictionary valueForKey:@"array"] retain];
+	arrAppDeptID=[[dictDept valueForKey:@"deptid"]retain];
+	arrDeptName=[[dictDept valueForKey:@"department"]retain];
+	
+	cntDept=[arrAppDeptID count];
+	//NSLog(@"Dept of id is%d",cntDept);
+	[myTable reloadData];	
+		
+}
+-(void)GDATADelete{	
+	//NSLog(@"delete id is%@",strTempDelID);
+	GdataParser *parser23 = [[GdataParser alloc] init];
+	[parser23 downloadAndParse:[NSURL  URLWithString:[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=deletesearch&udid=%@&searchids=%@",appdel.udID,strTempDelID]]
+	 
+				  withRootTag:@"deletesearch" 
+					  withTags:[NSDictionary dictionaryWithObjectsAndKeys:nil]
+
+					  
+						  sel:@selector(finishGetDataDelete:) 
+				   andHandler:self];
+	
+	
+}
+
+-(void)finishGetDataDelete:(NSDictionary*)dictionary{
+	
+	[myTable reloadData];
+
+	//[self GDATA];
+	
+	
+	//NSLog(@"This is dictionary after deleing mine funn: %@",dictionary);
+	
+}
+
+-(IBAction)sokDelete{
+	
+	
+	
+	
+	if(self.editing)
+	{ 
+		[super setEditing:NO animated:NO]; 
+		[myTable setEditing:NO animated:NO];
+		[myTable reloadData];
+		[self.navigationItem.leftBarButtonItem setTitle:@"Delete"];
+		[self.navigationItem.leftBarButtonItem setStyle:UIBarButtonItemStylePlain];
+		self.navigationItem.rightBarButtonItem.enabled=TRUE;
+	}
+	else
+	{
+		[super setEditing:YES animated:YES]; 
+		
+		[myTable setEditing:YES animated:YES];
+		[myTable reloadData];
+		[self.navigationItem.leftBarButtonItem setTitle:@"Done"];
+		[self.navigationItem.leftBarButtonItem setStyle:UIBarButtonItemStyleDone];
+		self.navigationItem.rightBarButtonItem.enabled=FALSE;
+	}
+	
+	
+}
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle 
+forRowAtIndexPath:(NSIndexPath *)indexPath {
+	
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+		//NSLog(@"id is  %@",arrSearchId);
+		NSMutableDictionary *t_d=[appdel.arrList objectAtIndex:indexPath.row];
+		strTempDelID=[t_d valueForKey:@"id"];
+		
+		//NSLog(@"id issssss  %@",strTempDelID);
+		
+		[appdel.arrList removeObjectAtIndex:indexPath.row];
+		//[arrSearchId removeObjectAtIndex:indexPath.row];
+		[self GDATADelete];
+		[t_d release];
+				
+	}
+}	
+
+
+#pragma mark -
+#pragma mark Table view data source
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	appdel.signSok=1;
+//	NSLog(@"arr is%@",arr);
+//	NSLog(@"aaa is::%@",[arr objectAtIndex:indexPath.row]);
+	if([[arr objectAtIndex:indexPath.row] isEqualToString:@""])
+		{
+			UIAlertView *alert=[[UIAlertView alloc] initWithTitle:@"No Eiendom"
+														  message:@"Trykk OK for å fortsette" 
+														 delegate:self 
+												cancelButtonTitle:nil 
+												otherButtonTitles:@"OK",nil];
+			[alert show];
+			[alert release];
+		}		
+	else{
+		appdel.signSok=9;
+	
+		detailViewController = [[MineFunnVC alloc] initWithNibName:@"MineFunnVC" bundle:nil];
+		_dict =[appdel.arrList objectAtIndex:indexPath.row];
+		NSString *strSearchId=[_dict valueForKey:@"id"];
+		appdel.strAppSearchId=strSearchId;  
+	appdel.currentArray=appdel.arrList;
+		
+		[self.navigationController pushViewController:detailViewController animated:YES];
+		[detailViewController release];
+	}
+}
+- (void)alertView:(UIAlertView *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+		 	// the user clicked one of the OK/Cancel buttons
+			if (buttonIndex == 0)
+			{
+				
+			}						
+		
+}
+// Customize the number of sections in the table view.
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return 1;
+}
+
+
+// Customize the number of rows in the table view.
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+   
+	return [appdel.arrList count];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+	
+	MineSokCell *cell = [MineSokCell dequeOrCreateInTable:myTable];
+	if(tempComplete==1)
+	{
+		
+		_dict = nil;
+		
+		//NSLog(@"%d",indexPath.row);
+		
+	_dict =[appdel.arrList objectAtIndex:indexPath.row];
+	strTempTown=[_dict valueForKey:@"town_id"];
+	strTempArea=[_dict valueForKey:@"area_id"];
+	strTempDept=[_dict valueForKey:@"department_id"];
+
+	arrSplitTown=[[strTempTown componentsSeparatedByString:@","]retain];
+	arrSplitArea=[[strTempArea componentsSeparatedByString:@","]retain];
+	arrSplitDept=[[strTempDept componentsSeparatedByString:@","]retain];
+	if([arrAppTownID count]!=0)
+	{
+	[self getTownName];
+	}
+	if([arrAppAreaID count]!=0)
+	{
+	[self getAreaName];
+	}
+	if([arrAppDeptID count]!=0){
+	[self getDeptName];
+	}
+	//NSLog(@"%@",dictExtra);
+	[cell setDataForLabels:dictExtra];
+	[cell setData: _dict];
+	
+	
+	if([arrCntProp count]!=0)
+	{
+		//NSLog(@"%@",arr);
+
+		//NSLog(@"cxjvkjdf%@",[arr objectAtIndex:indexPath.row]);
+		
+		if (indexPath.row<[arr count]) {
+		
+		if ([[arr objectAtIndex:indexPath.row] isEqualToString:@""]) 
+		{
+			cell.lblCntProp.text=@"0 lokaler";
+		}
+		else{
+		NSString *str=[NSString stringWithFormat:@"%@ lokaler", [arr objectAtIndex:indexPath.row]];
+
+			cell.lblCntProp.text=str;
+			//cell.accessoryType=UITableViewCellAccessoryDisclosureIndicator;
+				
+		}
+		}
+	}
+	
+	cell.backgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"header_w.png"]];
+	}
+	return cell;
+}
+
+/*-(void) getTownName
+{
+	//NSMutableArray *townNM=[[NSMutableArray alloc]init];
+	NSString *str3;
+	str3=[[NSString	alloc]init];
+	for(int j=0;j<[arrSplitTown count];j++)
+	{
+		for(int i=0;i<cntTown;i++)
+		{
+			if([[arrAppTownID objectAtIndex:i] isEqualToString:[arrSplitTown objectAtIndex:j]])
+			{
+				//NSLog(@"town %@",[arrTownName objectAtIndex:i]);
+				//NSLog(@"%@    %@",[arrAppTownID objectAtIndex:i],[arrSplitTown objectAtIndex:j]);
+
+				str3=[arrTownName objectAtIndex:i];
+				//NSLog(@"town name is %@",str3);
+				//[townNM addObject:str3];
+				
+			}
+			
+		}
+		
+	}
+	
+	[dictExtra setObject:[NSString stringWithFormat:@"%@",str3] forKey:@"town"];
+	//[str3 release];
+
+}*/
+-(void) getTownName{
+	
+	NSMutableArray *townNM=[[NSMutableArray alloc]init];
+	NSString *str1;
+	str1=[[NSString	alloc]init];
+	
+	for(int j=0;j<[arrSplitTown count];j++)
+	{
+		for(int i=0;i<cntTown;i++)
+		{
+			if([[arrAppTownID objectAtIndex:i] isEqualToString:[arrSplitTown objectAtIndex:j]])
+			{
+				NSLog(@"town");
+				
+				//NSLog(@"%@    %@",[arrAppAreaID objectAtIndex:i],[arrSplitArea objectAtIndex:j]);
+				
+				str1=[arrTownName objectAtIndex:i];
+				//NSLog(@"area name is %@",str1);
+				[townNM addObject:[NSString stringWithFormat:@"%@", str1]];
+				
+			}
+			
+		}
+		
+	}
+	if([townNM count]==0)
+	{
+		NSString *str;
+		str=@"";
+		[dictExtra setObject:[NSString stringWithFormat:@"%@",str]forKey:@"town"];
+		
+	}
+	else if([townNM count]==1)
+	{
+		[dictExtra setObject:[NSString stringWithFormat:@"%@",str1] forKey:@"town"];
+	}
+	else{
+		
+		for(int i=0;i<[townNM count]-1;i++)
+		{
+			
+			mix=[[townNM objectAtIndex:i] stringByAppendingString :[townNM objectAtIndex:i+1]];
+			
+		}
+		
+		//NSLog(@"mix is%@",mix);
+		[dictExtra setObject:mix forKey:@"town"];
+		
+	}
+	[townNM release];
+	//[str1 release];
+	
+	
+}
+
+	
+	
+-(void)getAreaName{
+	NSMutableArray *areaNM=[[NSMutableArray alloc]init];
+	NSString *str1;
+	str1=[[NSString	alloc]init];
+
+	for(int j=0;j<[arrSplitArea count];j++)
+	{
+		for(int i=0;i<cntArea;i++)
+		{
+			if([[arrAppAreaID objectAtIndex:i] isEqualToString:[arrSplitArea objectAtIndex:j]])
+			{
+				//NSLog(@"area");
+
+				//NSLog(@"%@    %@",[arrAppAreaID objectAtIndex:i],[arrSplitArea objectAtIndex:j]);
+
+				str1=[arrAreaName objectAtIndex:i];
+				//NSLog(@"area name is %@",str1);
+				[areaNM addObject:[NSString stringWithFormat:@"%@", str1]];
+				
+			}
+			
+		}
+		
+	}
+	if([areaNM count]==0)
+	{
+		NSString *str;
+		str=@"";
+		[dictExtra setObject:[NSString stringWithFormat:@"%@",str]forKey:@"area"];
+		
+	}
+	else if([areaNM count]==1)
+	{
+		[dictExtra setObject:[NSString stringWithFormat:@"%@",str1] forKey:@"area"];
+	}
+	else{
+
+	for(int i=0;i<[areaNM count]-1;i++)
+	{
+		
+		mix=[[areaNM objectAtIndex:i] stringByAppendingString :[areaNM objectAtIndex:i+1]];
+	
+	}
+	
+	//NSLog(@"mix is%@",mix);
+	[dictExtra setObject:mix forKey:@"area"];
+	
+	}
+	[areaNM release];
+	//[str1 release];
+
+	
+}
+-(void)getDeptName{
+	NSMutableArray *deptNM=[[NSMutableArray alloc]init];
+	NSString *str2;
+	str2=[[NSString	alloc]init];
+
+	for(int j=0;j<[arrSplitDept count];j++)
+	{
+		for(int i=0;i<cntDept;i++)
+		{
+			if([[arrAppDeptID objectAtIndex:i] isEqualToString:[arrSplitDept objectAtIndex:j]])
+			{
+			//	NSLog(@"dept");
+
+			//	NSLog(@"%@    %@",[arrAppDeptID objectAtIndex:i],[arrSplitDept objectAtIndex:j]);
+
+				str2=[arrDeptName objectAtIndex:i];
+				//NSLog(@"dept name is %@",str2);
+				[deptNM addObject:str2];
+			}
+		}
+	}
+	if([deptNM count]==0)
+	{
+		NSString *str;
+		str=@"";
+		[dictExtra setObject:[NSString stringWithFormat:@"%@",str]  forKey:@"dept"];
+	}
+	else if([deptNM count]==1)
+	{
+		[dictExtra setObject:[NSString stringWithFormat:@"%@",str2]  forKey:@"dept"];
+		
+	}
+	else{
+	for(int i=0;i<[deptNM count]-1;i++)
+	{
+		mix1=[[deptNM objectAtIndex:i] stringByAppendingString :[deptNM objectAtIndex:i+1]];
+		
+	}
+		//NSLog(@"mix111111 is%@",mix);
+	[dictExtra setObject:mix1 forKey:@"dept"];
+		
+	}
+	//[townNM release];
+	
+	[deptNM release];
+	//[str2 release];
+	}
+/*
+ // Override to support conditional editing of the table view.
+ - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+ // Return NO if you do not want the specified item to be editable.
+ return YES;
+ }
+ */
+
+
+/*
+ // Override to support editing the table view.
+ - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+ 
+ if (editingStyle == UITableViewCellEditingStyleDelete) {
+ // Delete the row from the data source.
+ [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath] withRowAnimation:UITableViewRowAnimationFade];
+ }   
+ else if (editingStyle == UITableViewCellEditingStyleInsert) {
+ // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
+ }   
+ }
+ */
+ 
+
+/*
+ // Override to support rearranging the table view.
+ - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath {
+ }
+ */
+
+
+/*
+ // Override to support conditional rearranging of the table view.
+ - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath {
+ // Return NO if you do not want the item to be re-orderable.
+ return YES;
+ }
+ */
+
+
+#pragma mark -
+#pragma mark Table view delegate
+
+	
+	
+#pragma mark -
+#pragma mark custom methods
+-(IBAction)clickBack
+{
+	appdel.signSok=0;
+	appdel.sokCnt=1;
+	[self.navigationController popViewControllerAnimated:YES];
+}
+
+- (void)didReceiveMemoryWarning {
+    // Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+}
+
+- (void)viewDidUnload {
+    [super viewDidUnload];
+    // Release any retained subviews of the main view.
+    // e.g. self.myOutlet = nil;
+}
+- (void)viewDidDisappear:(BOOL)animated{
+		
+}
+
+- (void)dealloc {
+   	
+	
+		[super dealloc];
+	if(arrTownName!=nil)
+	{
+		//arrTownName=nil;
+		
+		[arrTownName release];
+		
+	}
+	if(arrAreaName!=nil)
+	{
+		//arrAreaName=nil;
+		[arrAreaName release];
+	}
+	if(arrDeptName!=nil)
+	{
+		//arrDeptName=nil;
+		[arrDeptName release];
+	}
+	if(arr!=nil)
+	{	
+		//arr=nil;
+		[arr release];
+	}
+	if(strTempDelID!=nil)
+	{	
+		//strTempDelID=nil;
+		[strTempDelID release];
+	}
+	if(_dict!=nil)
+	{	
+		//_dict=nil;
+		[_dict release];
+	}
+	if(arrAppTownID!=nil)
+	{	
+		//arrAppTownID=nil;
+		[arrAppTownID release];
+	}
+	if(arrAppAreaID!=nil)
+	{	
+		//arrAppAreaID=nil;
+		[arrAppAreaID release];
+	}
+	if(arrTown!=nil)
+	{	
+		//arrTown=nil;
+		[arrTown release];
+	}
+	if(arrSplitArea!=nil)
+	{	
+		//arrSplitArea=nil;
+		[arrSplitArea release];
+	}
+	if(arrSplitDept!=nil)
+	{	
+		//arrSplitDept=nil;
+		[arrSplitDept release];
+	}
+	
+	if(arrAppDeptID!=nil)
+	{	
+		//arrAppDeptID=nil;
+		[arrAppDeptID release];
+	}
+	if(arrSearchId!=nil)
+	{	
+		//arrSearchId=nil;
+		[arrSearchId release];
+	}
+	if(arrCntProp!=nil)
+	{	
+		//arrCntProp=nil;
+		[arrCntProp release];
+	}
+	if(arrSplitTown!=nil)
+	{	
+		//arrSplitTown=nil;
+		[arrSplitTown release];
+	}
+	if(dictTown!=nil)
+	{	
+		//dictTown=nil;
+		[dictTown release];
+	}
+	if(dictArea!=nil)
+	{	
+		//dictArea=nil;
+		[dictArea release];
+	}
+	if(dictDept!=nil)
+	{	
+		//dictDept=nil;
+		[dictDept release];
+	}
+	if(dictExtra!=nil)
+	{	
+		//dictExtra=nil;
+		[dictExtra release];
+	}
+	
+}
+
+@end

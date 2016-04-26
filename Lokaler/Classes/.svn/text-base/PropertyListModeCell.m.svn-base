@@ -1,0 +1,77 @@
+//
+//  PropertyListModeCell.m
+//  EstateLokaler
+//
+//  Created by apple on 9/6/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import "PropertyListModeCell.h"
+#import "PropertyListMode.h"
+#import "EstateLokalerAppDelegate.h"
+#define FONT_SIZE 12.0f
+#define CELL_CONTENT_WIDTH 220.0f
+#define CELL_CONTENT_MARGIN 10.0f
+
+ 
+@implementation PropertyListModeCell
+@synthesize imgView,lblAvstand;
+
+//@synthesize fnm,fsize,AddHeight;
+//@synthesize tmpdic;
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+	
+    if (self) {
+        // Initialization code.
+    }
+    return self;
+}
+
+
+-(void)setData:(NSMutableDictionary*)dt{
+	appdel=(EstateLokalerAppDelegate *)[[UIApplication sharedApplication] delegate];
+	
+	strTitle=[NSString stringWithFormat:@"%@, %@", [dt valueForKey:@"title"],[dt valueForKey:@"houseno"]];
+	strAddress=[NSString stringWithFormat:@"%@-%@ kvm, %@", [dt valueForKey:@"fromarea"],[dt valueForKey:@"toarea"],[dt valueForKey:@"departmentname"]];
+	strTownName=[dt valueForKey:@"shortDescription"];
+	lblTitle.text=strTitle;
+	lblAddress.text=strAddress;
+	lblTownName.text=strTownName;
+}
+
+-(CGFloat)setData1:(NSMutableDictionary*)dt{
+	
+	strHouseNo=[dt valueForKey:@"houseno"];
+	strTitle=[dt valueForKey:@"title"];
+	strAddress=[dt valueForKey:@"adress"];
+	strAreaName=[dt valueForKey:@"areaname"];
+	strTownName=[dt valueForKey:@"townname"];
+
+}	
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    
+    [super setSelected:selected animated:animated];
+    
+    // Configure the view for the selected state.
+}
+
+
+
+- (void)dealloc {
+    [super dealloc];
+	[lblHouseNo release];
+	[lblTitle release];
+	[lblAddress release];
+	[lblAreaName release];
+	[lblAvstand release];
+
+	[lblTownName release];
+	
+}
+
+
+@end

@@ -1,0 +1,222 @@
+//
+//  MineSokCell1.m
+//  EstateLokaler
+//
+//  Created by apple  on 9/29/11.
+//  Copyright 2011 hjbvb. All rights reserved.
+//
+
+#import "MineSokCell.h"
+
+#import "MineSokVC.h"
+#import "PropertyListMode.h"
+@implementation MineSokCell
+@synthesize lblCntProp;
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        // Initialization code.
+    }
+    return self;
+}
+-(IBAction)clickDetails{
+	
+	
+	//PropertyListMode *propertyListMode=[[PropertyListMode alloc]initWithNibName:@"PropertyListMode" bundle:nil];
+//	[self.navigationController pushViewController:propertyListMode animated:YES];
+//	[propertyListMode release];
+	
+}
+
+//- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+//    
+//    [super setSelected:selected animated:animated];
+//    
+//    // Configure the view for the selected state.
+//}
+ 
+
+
+-(void)setData:(NSMutableDictionary*)dt{
+	
+	//NSLog(@"dt::%@",dt);
+	NSString *str=[dt valueForKey:@"from_area"];
+	
+	
+	
+	if([str isEqualToString:@"(null)"])
+	{
+		lblFromTo.text=@"Alle Størrelser";
+		
+	}
+	else{
+		strFromTo=[NSString stringWithFormat:@"%@-%@ kvm ", [dt valueForKey:@"from_area"],[dt valueForKey:@"to_area"]];
+		lblFromTo.text=strFromTo;
+	}
+	
+
+	
+	strDate=[dt valueForKey:@"date_insert"];
+	NSMutableArray *splitDate=[[strDate componentsSeparatedByString:@" "]retain];
+		
+	NSDateFormatter *dateForm = [[NSDateFormatter alloc] init];
+	
+	[dateForm setDateFormat:@"yyyy-MM-dd"];
+	
+	NSDate *dateSelected = [dateForm dateFromString:[splitDate objectAtIndex:0]];
+	NSDateFormatter *dateForm1 = [[NSDateFormatter alloc] init];
+	
+	[dateForm1 setDateFormat:@"dd. MMMM yyyy."];
+	NSString *temp;
+	temp=[dateForm1 stringFromDate:dateSelected];
+
+	
+	
+	
+	
+	NSDateFormatter *dateFor = [[NSDateFormatter alloc] init];
+	
+	[dateFor setDateFormat:@"HH:mm:ss"];
+	
+	NSDate *dateSelected1 = [dateFor dateFromString:[splitDate objectAtIndex:1]];
+	NSDateFormatter *dateFor1 = [[NSDateFormatter alloc] init];
+	
+	[dateFor1 setDateFormat:@"HH:mm"];
+	NSString *temp1;
+	temp1=[dateFor1 stringFromDate:dateSelected1];
+
+	NSMutableArray *arrsplit=[[NSMutableArray alloc]init];	
+	arrsplit=(NSMutableArray *)[temp componentsSeparatedByString:@" "];
+	if([[arrsplit objectAtIndex:1] isEqualToString:@"January"]){
+		[arrsplit removeObjectAtIndex:1];
+		[arrsplit insertObject:@"januar " atIndex:1];
+	}
+	
+	else if([[arrsplit objectAtIndex:1] isEqualToString:@"February"]){
+		[arrsplit removeObjectAtIndex:1];
+		[arrsplit insertObject:@"februar " atIndex:1];
+		
+	}
+	else if([[arrsplit objectAtIndex:1] isEqualToString:@"March"]){
+		[arrsplit removeObjectAtIndex:1];
+		[arrsplit insertObject:@"mars " atIndex:1];
+		
+	}
+	else if([[arrsplit objectAtIndex:1] isEqualToString:@"April"]){
+		[arrsplit removeObjectAtIndex:1];
+		[arrsplit insertObject:@"april " atIndex:1];
+		
+	}
+	else if([[arrsplit objectAtIndex:1] isEqualToString:@"May"]){
+		[arrsplit removeObjectAtIndex:1];
+		[arrsplit insertObject:@"mai " atIndex:1];
+		
+	}
+	else if([[arrsplit objectAtIndex:1] isEqualToString:@"June"]){
+		[arrsplit removeObjectAtIndex:1];
+		[arrsplit insertObject:@"juni " atIndex:1];
+		
+	}
+	else if([[arrsplit objectAtIndex:1] isEqualToString:@"July"]){
+		[arrsplit removeObjectAtIndex:1];
+		[arrsplit insertObject:@"august " atIndex:1];
+		
+	}
+	else if([[arrsplit objectAtIndex:1] isEqualToString:@"August"]){
+		[arrsplit removeObjectAtIndex:1];
+		[arrsplit insertObject:@"november " atIndex:1];
+		
+	}
+	else if([[arrsplit objectAtIndex:1] isEqualToString:@"September"]){
+		[arrsplit removeObjectAtIndex:1];
+		[arrsplit insertObject:@"september " atIndex:1];
+		
+	}
+	else if([[arrsplit objectAtIndex:1] isEqualToString:@"October"]){
+		[arrsplit removeObjectAtIndex:1];
+		[arrsplit insertObject:@"oktober " atIndex:1];
+		
+	}
+	else if([[arrsplit objectAtIndex:1] isEqualToString:@"November"]){
+		[arrsplit removeObjectAtIndex:1];
+		[arrsplit insertObject:@"november " atIndex:1];
+		
+	}
+	
+	else {
+		[arrsplit removeObjectAtIndex:1];
+		[arrsplit insertObject:@"desember " atIndex:1];
+		
+	}
+	NSMutableString *str1 = [[NSMutableString alloc] init];
+	for(int i=0;i<3;i++)
+	{
+		NSLog(@"%@",[arrsplit objectAtIndex:i]);
+
+		str1=[str1 stringByAppendingString:[arrsplit objectAtIndex:i]];
+		
+	}
+	NSLog(@"%@",str1);
+	
+	lblDate.text=[NSString stringWithFormat:@"%@ KI. %@",str1,temp1];
+	
+	
+	[dateForm release];
+	[dateFor release];
+}	
+
+-(void)setDataForLabels:(NSMutableDictionary*)dt1{
+	
+	//strTown=[dt1 valueForKey:@"town"];
+//	lblTown.text=strTown;
+//	strArea=[dt1 valueForKey:@"area"];
+//	lblArea.text=strArea;
+	strDept=[dt1 valueForKey:@"dept"];
+	if([strDept isEqualToString:@""])
+		{
+			
+			lblDept.text=@"Alle Typer";
+		}
+	else
+	lblDept.text=strDept;
+	NSString *t1,*t2;
+	t1=[dt1 valueForKey:@"area"];
+	t2=[dt1 valueForKey:@"town"];
+	
+	if([t1 isEqualToString:@""] && [t2 isEqualToString: @"" ])
+	{
+		
+		lblArea.text=@"Alle Kommuner/Områder,Alle flyker";
+		
+		
+		
+	}
+	else if([t1 isEqualToString:@""] || [t2 isEqualToString: @"" ])
+	{
+		if(![t1 isEqualToString:@""])
+			lblArea.text=[dt1 valueForKey:@"area"];
+	
+		if(![t2 isEqualToString: @"" ])
+		
+		lblArea.text=[dt1 valueForKey:@"town"];
+		
+	}
+	if(![t1 isEqualToString:@""] && ![t2 isEqualToString: @"" ])
+	{
+		strArea=[NSString stringWithFormat:@"%@,%@  ", [dt1 valueForKey:@"area"],[dt1 valueForKey:@"town"]];
+		lblArea.text=strArea;
+	}
+}
+- (void)dealloc { 
+    [super dealloc];
+	[lblTitle release];
+	[lblArea release];
+	[lblFromTo release];
+	[lblDate release];
+	[lblTown release];
+	
+}
+
+@end

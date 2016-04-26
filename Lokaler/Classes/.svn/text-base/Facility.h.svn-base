@@ -1,0 +1,43 @@
+//
+//  Facility.h
+//  EstateLokaler
+//
+//  Created by apple1 on 10/15/11.
+//  Copyright 2011 openxcek. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+
+@interface Facility : UITableViewCell {
+
+	IBOutlet UIImageView *imgBGFaci;
+	IBOutlet UILabel *lblFaci;
+	IBOutlet UILabel *lblFaci1;
+	IBOutlet UILabel *lblFaci2;
+	IBOutlet UILabel *lblFaci3;
+	IBOutlet UILabel *lblFaci4;
+	IBOutlet UILabel *lblFaci5;
+	IBOutlet UIImageView *imgPnt;
+	IBOutlet UIImageView *imgPnt1;
+	IBOutlet UIImageView *imgPnt2;
+	IBOutlet UIImageView *imgPnt3;
+	IBOutlet UIImageView *imgPnt4;
+	IBOutlet UIImageView *imgPnt5;
+	
+}
+
+@property(nonatomic,retain)IBOutlet UIImageView *imgBGFaci;
+@property(nonatomic,retain)UILabel *lblFaci;
+@property(nonatomic,retain)UILabel *lblFaci1;
+@property(nonatomic,retain)UILabel *lblFaci2;
+@property(nonatomic,retain)UILabel *lblFaci3;
+@property(nonatomic,retain)UILabel *lblFaci4;
+@property(nonatomic,retain)UILabel *lblFaci5;
+@property(nonatomic,retain)UIImageView *imgPnt;
+@property(nonatomic,retain)UIImageView *imgPnt1;
+@property(nonatomic,retain)UIImageView *imgPnt2;
+@property(nonatomic,retain)UIImageView *imgPnt3;
+@property(nonatomic,retain)UIImageView *imgPnt4;
+@property(nonatomic,retain)UIImageView *imgPnt5;
+@end

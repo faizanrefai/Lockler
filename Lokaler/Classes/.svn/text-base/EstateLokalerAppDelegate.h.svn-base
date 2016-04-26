@@ -1,0 +1,142 @@
+//
+//  EstateLokalerAppDelegate.h
+//  EstateLokaler
+//
+//  Created by apple on 9/6/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+//#import "CLLocationManager.h"
+#import <MapKit/MapKit.h>
+@class GdataParser;
+
+@interface EstateLokalerAppDelegate : NSObject <UIApplicationDelegate>//,CLLocationManagerDelegate> {
+{
+    UIWindow *window;
+    UINavigationController *navigationController;
+	
+	CLLocationManager *locationManager;
+	double lat;
+	double lon; 
+	
+	NSMutableArray *arrList;
+	NSMutableArray *arrList1;
+	NSMutableArray *appdel_ArrayFilterBack;
+	NSMutableArray *appdel_ArrayFilterSave;
+	NSMutableArray *currentArray;
+	NSArray *arrayForPoopFrags;
+	NSArray *arrayForPoopTypes;
+	NSArray *arrayPremises;
+	NSMutableArray *distance;
+	
+	NSMutableDictionary *appdel_dicFilterBack;
+	NSMutableDictionary *appdel_dicFilterSave;
+	NSMutableDictionary *currentDict;
+	NSMutableDictionary *dicPremises;
+	  
+	NSString *strTypeLokaleID;
+	
+	NSMutableArray *strFylkeID;
+	NSMutableArray *strAreaID;
+	NSMutableArray *appdel_strSize;
+	
+	
+	NSString *strSizeID;
+	NSString *aVar;
+	NSString *strAppSearchId;
+	NSString *strAppLat;
+	NSString *strAppLong;
+	NSString *strArtID;
+	NSString *udID;
+	NSString *appdelStrID;
+	NSString *appdelStrSearch;
+	NSString *appdelStrSortID;
+	NSString *appdelStrLokaleID;
+	NSString *strDistance;
+	NSString *strTitleMap;
+	
+	int flag;
+	int flagOfPremises;
+	int flagOfTwelve;
+	int flagFilter;
+	int buttonClick;
+	int signSok;
+	int flagsokSearch;
+	int currentElement;
+	float floatTEMP;
+	int addcnt;
+	int sokCnt;
+	int propCount;
+	int flagDetailVC;
+	int pickerTag;
+	int pickerTagArea;
+	BOOL isAlert;
+	BOOL isDetail;
+	
+	}
+
+@property int pickerTagArea;
+
+@property(nonatomic,readwrite) int addcnt;
+@property(nonatomic)	BOOL isAlert;
+@property(nonatomic)	BOOL isDetail;;
+@property int flag;
+@property int signSok;
+@property int flagOfTwelve;
+@property int flagsokSearch;
+@property int buttonClick;
+@property int flagFilter;
+@property int currentElement;
+@property int propCount;
+@property int flagOfPremises;
+@property int flagDetailVC;
+@property int sokCnt;
+@property int pickerTag;
+
+@property(nonatomic,readwrite) float floatTEMP;
+@property(nonatomic,retain)NSString *strAppLat;
+@property(nonatomic,retain)NSString *strArtID;
+@property(nonatomic,retain)NSString *strAppLong;
+@property(nonatomic,retain)NSString *strTitleMap;
+@property(nonatomic,retain)	NSArray *arrayPremises;
+@property(nonatomic,retain)	NSArray *arrayForPoopFrags;
+@property(nonatomic,retain)	NSArray *arrayForPoopTypes;
+@property(nonatomic,retain) NSMutableArray *arrList;
+@property(nonatomic,retain) NSMutableArray *arrList1;
+@property(nonatomic,retain) NSMutableArray *currentArray;
+@property(nonatomic,retain) NSMutableArray *appdel_ArrayFilterBack;
+@property(nonatomic,retain) NSMutableArray *appdel_ArrayFilterSave;
+@property(nonatomic,retain) NSMutableArray *distance;
+@property(nonatomic,retain) NSMutableArray *appdel_strSize;
+@property(nonatomic,retain) NSString *strAppSearchId;
+@property(nonatomic,retain) NSString *udID;
+@property(nonatomic,retain) NSString *appdelStrLokaleID;
+@property(nonatomic,retain) NSString *appdelStrSortID;
+@property(nonatomic,retain) NSString *aVar;
+@property(nonatomic,retain) NSString *appdelStrSearch;
+@property(nonatomic,retain) NSString *appdelStrID;
+@property(nonatomic,retain) NSString	*strTypeLokaleID;
+@property(nonatomic,retain) NSMutableArray	*strFylkeID;
+@property(nonatomic,retain) NSMutableArray	*strAreaID;
+@property(nonatomic,retain) NSString	*strSizeID;
+@property(nonatomic,retain) NSString	*strDistance;
+@property(nonatomic,retain)NSMutableDictionary *dictTown;
+@property(nonatomic,retain)NSMutableDictionary *dictArea;
+@property(nonatomic,retain)NSMutableDictionary *dictDept;
+@property(nonatomic,retain)NSMutableDictionary *appdel_dicFilterBack;
+@property(nonatomic,retain)NSMutableDictionary *appdel_dicFilterSave;
+@property(nonatomic,retain)NSMutableDictionary *currentDict;
+@property(nonatomic,retain)NSMutableDictionary *dicPremises;
+
+@property (nonatomic, retain) IBOutlet UIWindow *window;
+@property (nonatomic, retain) IBOutlet UINavigationController *navigationController;
+
+@property double lat;
+@property double lon; 
+
+
+
+-(void)GDATATown;
+@end
+

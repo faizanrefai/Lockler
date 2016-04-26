@@ -1,0 +1,48 @@
+//
+//  Facility.m
+//  EstateLokaler
+//
+//  Created by apple1 on 10/15/11.
+//  Copyright 2011 openxcek. All rights reserved.
+//
+
+#import "Facility.h"
+
+
+@implementation Facility
+@synthesize lblFaci,lblFaci1,lblFaci2,lblFaci3,lblFaci4,lblFaci5,imgPnt,imgPnt1,imgPnt2,imgPnt3,imgPnt4,imgPnt5;
+@synthesize imgBGFaci;
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        // Initialization code.
+    }
+    return self;
+}
+
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    
+    [super setSelected:selected animated:animated];
+    
+    // Configure the view for the selected state.
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+	
+	[lblFaci release];
+	[lblFaci1 release];
+	[lblFaci2 release];
+	[lblFaci3 release];
+	[lblFaci4 release];
+	[lblFaci5 release];
+	[imgPnt release];
+	
+}
+
+
+@end

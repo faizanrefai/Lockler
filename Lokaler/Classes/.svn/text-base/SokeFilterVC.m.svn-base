@@ -1,0 +1,1174 @@
+//
+//  SokeFilterVC.m
+//  EstateLokaler
+//
+//  Created by apple on 9/7/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import "SokeFilterVC.h"
+#import "GdataParser.h"
+#import "EstateLokalerAppDelegate.h"
+#import "PropertyListMode.h"
+#import "ALPickerView.h"
+
+@implementation SokeFilterVC
+
+@synthesize distance;
+//@synthesize flagSave,arrayTypeLokale,arrTypeLokaleID;
+//@synthesize str;
+//@synthesize strTypeLokaleID,strFylkeID,strSizeID,arrSplitSize;
+
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+	lblText = @"";
+	appdel=(EstateLokalerAppDelegate *)[[UIApplication sharedApplication]delegate];
+	
+	appdel.strTypeLokaleID=@"";
+	appdel.strFylkeID=[NSString stringWithFormat:@""];
+	appdel.strAreaID=[NSString stringWithFormat:@""];
+	appdel.strSizeID=@"";
+	appdel.flagFilter=0;
+	
+	btnOmrade.userInteractionEnabled=FALSE;
+	btnOmrade.alpha =0.3;
+	lblOmradeTitle.alpha=0.3;
+	lblArea.alpha=0.3;
+	
+	flagSave=0;
+	
+	lblArea.text=@"Alle Kommuner/Områder";
+	lblSize.text=@"Alle Størrelser";
+	lblTypeLokaleText.text=@"Alle Typer";
+	lblFlyke.text=@"Alle flyker";
+	
+	downPickerToolBar.hidden=TRUE;
+	typeLokalePicker.hidden=TRUE;
+	btnFerdig.hidden=TRUE;
+	lblTypeLokale.hidden=TRUE;
+	
+	arrayTypeLokale = [[NSMutableArray alloc] init];
+	arrayCountLokale= [[NSMutableArray alloc] init];
+	arrayDisplay= [[NSMutableArray alloc] init];
+	arrayDisplayTown= [[NSMutableArray alloc] init];
+    arrArea=[[NSMutableArray alloc]init];
+    arrFlyke=[[NSMutableArray alloc]init];
+    arrSize=[[NSMutableArray alloc]init];
+	//distance=[[NSMutableArray alloc]init];
+	arrLat=[[NSMutableArray alloc]init];
+	arrLong=[[NSMutableArray alloc]init];
+	arrFlykeId=[[NSMutableArray alloc]init];
+	arrTypeLokaleID=[[NSMutableArray alloc]init];
+	arrAreaID=[[NSMutableArray alloc]init];
+	arrSizeID=[[NSMutableArray alloc]init];
+	strTypeLokaleID=[[NSString alloc]init];
+	strFylkeID=[[NSString alloc]init];
+	strAreaID=[[NSString alloc]init];
+	strSizeID=[[NSString alloc]init];
+	
+	[viewAlert setFrame:CGRectMake(19, 470, 285, 185)];
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+	arrFilterLokalerID=[[NSMutableArray alloc]init];
+	arrFilterFlykeID=[[NSMutableArray alloc]init];
+	arrFilterAreaID=[[NSMutableArray alloc]init];
+	arrFilterSizeID=[[NSMutableArray alloc]init];
+	arrFilterSize=[[NSMutableArray alloc]init];
+	filterArr=[[NSMutableArray alloc]init];
+	filterArr1=[[NSMutableArray alloc]init];
+	filterArr2=[[NSMutableArray alloc]init];
+	filterArr3=[[NSMutableArray alloc]init];
+	
+		//[self setToolBarFrames];
+}
+
+-(void)GDATA{	
+	[filterArr removeAllObjects];
+	lblTypeLokaleText.text=@"";
+	
+	GdataParser *parser = [[GdataParser alloc] init];
+	[parser downloadAndParse:[NSURL
+							  URLWithString:@"http://www.estatelokaler.no/appservice.php?token=typelokale"]
+				 withRootTag:@"post" 
+					withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"deptid",@"deptid",@"department",@"department",@"cnt",@"cnt",nil]
+					sel:@selector(finishGetData:) 
+				  andHandler:self];
+}
+
+-(void)finishGetData:(NSDictionary*)dictionary{
+  
+    [appdel.arrList removeAllObjects];
+    [arrayTypeLokale removeAllObjects];
+	
+    appdel.arrList =[dictionary valueForKey:@"array"];
+	
+    cnt=[appdel.arrList count];
+  	t_dic=[dictionary valueForKey:@"array"];
+	
+	[arrayTypeLokale removeAllObjects];
+	[arrTypeLokaleID removeAllObjects];
+	[arrayCountLokale removeAllObjects];
+
+    for(int i=0;i<cnt;i++)
+    {
+        t_dic =[appdel.arrList objectAtIndex:i];
+       [arrayTypeLokale addObject:[t_dic valueForKey:@"department"]];
+		//[arrayCountLokale addObject:[appdel.arrList valueForKey:@"department"],[appdel.arrList valueForKey:@"cnt"]];
+		[arrTypeLokaleID addObject:[t_dic valueForKey:@"deptid"] ];
+		[arrayCountLokale addObject:[t_dic valueForKey:@"cnt"]];
+		
+		[arrayDisplay addObject:[NSString stringWithFormat:@"%@ (%@)", [t_dic valueForKey:@"department"],[t_dic valueForKey:@"cnt"]]];
+		//NSLog(@"dept are----->>>>%@",[t_dic valueForKey:@"department"]);
+	}
+	selectionStates = [[NSMutableDictionary alloc] init];
+	for (NSString *key in arrayTypeLokale)
+		[selectionStates setObject:[NSNumber numberWithBool:NO] forKey:key];
+	
+		pickerView = [[ALPickerView alloc] initWithFrame:CGRectMake(0.f, 244.f, 0.f, 0.f)];
+	pickerView.delegate = self;
+	pickerView.allOption = YES;
+	pickerView.tag=1;
+	appdel.pickerTag=pickerView.tag;
+
+	
+	//NSLog(@"app::%d",appdel.pickerTag);
+	[self presentPickerView:1];
+	[self.view addSubview:pickerView];	
+		[pickerView release];
+}
+
+-(void)GDATAFylke{
+	[filterArr1 removeAllObjects];
+	GdataParser *parser1 = [[GdataParser alloc] init];
+	[parser1 downloadAndParse:[NSURL
+							  URLWithString:@"http://www.estatelokaler.no/appservice.php?token=flyke"]
+				 withRootTag:@"post" 
+					withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"townid",@"townid",@"town",@"town",@"cnt",@"cnt",nil]
+						 sel:@selector(finishGetDataFylke:) 
+				  andHandler:self];
+}
+
+-(void)finishGetDataFylke:(NSDictionary*)dictionary{
+	//NSLog(@"This is dictionary: %@",dictionary);
+	
+	[arrListFlyke	removeAllObjects];
+	[arrFlyke removeAllObjects];
+	arrListFlyke =[dictionary valueForKey:@"array"];
+	cnt=[arrListFlyke count];
+	//NSLog(@"Count is !!!!!!!!!!!!!!!is %d",cnt);
+	
+	
+	[arrayDisplayTown removeAllObjects];
+	[arrFlyke removeAllObjects];
+	[arrFlykeId removeAllObjects];
+	
+	//[arrFlyke addObject:@"Alle flyker"];
+//	[arrFlykeId addObject:@""];
+	
+	for(int i=0;i<cnt;i++)
+	{
+		t_dic1 =[arrListFlyke objectAtIndex:i];
+		[arrFlyke	addObject:[t_dic1 valueForKey:@"town"]];
+		[arrFlykeId addObject:[t_dic1 valueForKey:@"townid"]] ;
+		[arrayDisplayTown addObject:[NSString stringWithFormat:@"%@ (%@)",[t_dic1 valueForKey:@"town"],[t_dic1 valueForKey:@"cnt"]]];
+	}
+	selectionStates = [[NSMutableDictionary alloc] init];
+	for (NSString *key in arrFlyke)
+		[selectionStates setObject:[NSNumber numberWithBool:NO] forKey:key];
+	
+	pickerView = [[ALPickerView alloc] initWithFrame:CGRectMake(0.f, 244.f, 0.f, 0.f)];
+	pickerView.delegate = self;
+		pickerView.allOption = YES;
+	pickerView.tag=2;
+	appdel.pickerTag=pickerView.tag;
+   
+	
+	[self presentPickerView:2];	
+
+	[self.view addSubview:pickerView];
+		[pickerView release];
+}
+
+-(void)GDATAArea{
+	[filterArr2 removeAllObjects];
+	//NSLog(@"Value of a is %@",appdel.aVar);
+	NSString *temp=@"Alle flyker";
+	GdataParser *parser2 = [[GdataParser alloc] init];
+	if([lblFlyke.text isEqualToString:temp])
+	{
+		[parser2 downloadAndParse:[NSURL
+								   URLWithString: @"http://www.estatelokaler.no/appservice.php?token=kommune&townIds=1,2,3"]
+					  withRootTag:@"post" 
+						 withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"areaid",@"areaid",@"area",@"area",nil]
+							  sel:@selector(finishGetDataArea:) 
+					   andHandler:self];
+	}
+	else
+	{
+		[parser2 downloadAndParse:[NSURL
+								   URLWithString:[NSString stringWithFormat: @"http://www.estatelokaler.no/appservice.php?token=kommune&townIds=%@",appdel.aVar]]
+					  withRootTag:@"post" 
+						 withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"areaid",@"areaid",@"area",@"area",nil]
+							  sel:@selector(finishGetDataArea:) 
+					   andHandler:self];
+	}
+}
+
+-(void)finishGetDataArea:(NSDictionary*)dictionary{
+	//NSLog(@"This is dictionary: %@",dictionary);
+   
+	[arrArea removeAllObjects];
+	[arrListArea	removeAllObjects];
+	[arrAreaID removeAllObjects];
+	
+	arrListArea =[dictionary valueForKey:@"array"];
+	t_dic2=[dictionary valueForKey:@"array"];
+	//NSLog(@"%@",arrListArea);
+	cnt=[arrListArea count];
+	//[arrArea addObject:@"Alle Kommune/Område"];
+//	[arrAreaID addObject:@""];
+
+	for(int i=0;i<cnt;i++)
+	{
+		t_dic2 =[arrListArea objectAtIndex:i];
+		[arrArea	addObject:[t_dic2 valueForKey:@"area"]];
+		[arrAreaID addObject:[t_dic2 valueForKey:@"areaid"]];
+	}
+
+	selectionStates = [[NSMutableDictionary alloc] init];
+	for (NSString *key in arrArea)
+		[selectionStates setObject:[NSNumber numberWithBool:NO] forKey:key];
+	
+	
+	pickerView = [[ALPickerView alloc] initWithFrame:CGRectMake(0.f, 244.f, 0.f, 0.f)];
+	pickerView.delegate = self;
+	pickerView.allOption = YES;
+	pickerView.tag=3;
+	appdel.pickerTag=pickerView.tag;
+	//NSLog(@"app::%d",appdel.pickerTag);
+	[self presentPickerView:3];
+	[self.view addSubview:pickerView];
+	[pickerView release];
+	
+}
+
+-(void)GDATASize{
+	[filterArr3 removeAllObjects];
+	GdataParser *parser3 = [[GdataParser alloc] init];
+	[parser3 downloadAndParse:[NSURL
+							   URLWithString:@"http://www.estatelokaler.no/appservice.php?token=size"]
+				  withRootTag:@"post" 
+					 withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"id",@"id",@"size_range",@"size_range",@"from",@"from",@"to",@"to",nil]
+						  sel:@selector(finishGetDataSize:) 
+				   andHandler:self];	
+}
+ 
+-(void)finishGetDataSize:(NSDictionary*)dictionary{
+	//NSLog(@"This is dictionary: %@",dictionary);
+	
+	[arrListSize	removeAllObjects];
+	[arrSize removeAllObjects];
+	arrListSize =[dictionary valueForKey:@"array"];
+	cnt=[arrListSize	count];
+	//NSLog(@"Count is !!!!!!!!!!!!!!!is %d",cnt);
+	[arrSizeID removeAllObjects];
+	[arrSize removeAllObjects];
+	//[arrSize addObject:@"Alle Størrelser"];
+//	[arrSizeID addObject:@""];
+	for(int i=0;i<cnt;i++)
+	{
+		t_dicSize=[arrListSize objectAtIndex:i];
+		[arrSize addObject:[t_dicSize valueForKey:@"size_range"]];
+		[arrSizeID addObject:[t_dicSize valueForKey:@"id"]];
+		//NSLog(@"sizes  are----->>>>%@",[t_dicSize	valueForKey:@"size_range"]);
+	}
+	//NSLog(@"Array of size is %@",arrSize);
+	//NSLog(@"Array of id is %@",arrFlykeId);
+	
+	selectionStates = [[NSMutableDictionary alloc] init];
+	for (NSString *key in arrSize)
+		[selectionStates setObject:[NSNumber numberWithBool:NO] forKey:key];
+	
+	pickerView = [[ALPickerView alloc] initWithFrame:CGRectMake(0.f, 244.f, 0.f, 0.f)];
+	pickerView.delegate = self;
+	pickerView.allOption = YES;
+	pickerView.tag=4;
+	appdel.pickerTag=pickerView.tag;
+	
+	[self presentPickerView:4];
+	[self.view addSubview:pickerView];	
+	
+	[pickerView release];
+	
+	
+	
+}
+
+
+/*
+// Override to allow orientations other than the default portrait orientation.
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations.
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+*/
+#pragma mark -
+#pragma mark Picker View Methods
+
+
+- (NSString *)pickerView:(ALPickerView *)thePickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component {
+	btnFerdig.hidden=FALSE;
+	//rowId =row;
+
+	if(thePickerView.tag==1){
+		
+		lblTypeLokale.text=@"Type Lokale";
+	return [arrayTypeLokale objectAtIndex:row];
+	}
+	else if(thePickerView.tag==2)
+	{
+		lblTypeLokale.text=@"Fylke";
+		return [arrFlyke	objectAtIndex:row];
+	}
+	else if(thePickerView.tag==3)
+	{
+		lblTypeLokale.text=@"Kommune/Omrade";
+		return [arrArea	objectAtIndex:row];
+	}
+	else 
+	{
+		lblTypeLokale.text=@"Storrelse";
+		return [arrSize	objectAtIndex:row];
+	}
+}
+
+
+
+- (NSInteger)numberOfRowsForPickerView:(ALPickerView *)thePickerView {
+	if(thePickerView.tag==1){
+		return [arrayDisplay count];
+	}
+	else if(thePickerView.tag==2){
+		return [arrayDisplayTown count];
+	}
+	else if(thePickerView.tag==3){
+		return [arrArea count];
+
+	}
+	else if(thePickerView.tag==4){
+		return	[arrSize count];
+	}
+		
+	return 0;
+}
+
+- (NSString *)pickerView:(ALPickerView *)thePickerView textForRow:(NSInteger)row {
+	if(thePickerView.tag==1){
+		return [arrayDisplay objectAtIndex:row];
+		//	[arrayCountLokale objectAtIndex:row]];
+		
+	}
+	else if(thePickerView.tag==2){
+		return [arrayDisplayTown objectAtIndex:row];
+	}
+	else if(thePickerView.tag==3){
+		return [arrArea objectAtIndex:row];
+		
+	}
+	else if(thePickerView.tag==4){
+		return	[arrSize objectAtIndex:row];
+	}
+	return 0;
+
+}
+
+- (BOOL)pickerView:(ALPickerView *)thePickerView selectionStateForRow:(NSInteger)row {
+	if(thePickerView.tag==1)
+		return [[selectionStates objectForKey:[arrayTypeLokale objectAtIndex:row]] boolValue];
+	else if(thePickerView.tag==2)
+		return [[selectionStates objectForKey:[arrFlyke objectAtIndex:row]] boolValue];	
+	else if(thePickerView.tag==3)
+		return [[selectionStates objectForKey:[arrArea objectAtIndex:row]] boolValue];
+	else if(thePickerView.tag==4)
+		return [[selectionStates objectForKey:[arrSize objectAtIndex:row]] boolValue];
+	return YES;
+}
+
+- (void)pickerView:(ALPickerView *)thePickerView didCheckRow:(NSInteger)row {
+	// Check whether all rows are checked or only one
+	lblText=@"";
+	lblText1=@"";
+	lblText2=@"";
+	lblText3=@"";
+	
+	if (thePickerView.tag==1) {
+		
+	
+	if (row == -1)
+		for (id key in [selectionStates allKeys])
+			[selectionStates setObject:[NSNumber numberWithBool:YES] forKey:key];
+	else{
+		[selectionStates setObject:[NSNumber numberWithBool:YES] forKey:[arrayTypeLokale objectAtIndex:row]];
+		[arrFilterLokalerID addObject:[NSString stringWithFormat:@"%@",[arrTypeLokaleID objectAtIndex:row]]];
+	
+		[filterArr addObject:[arrayTypeLokale objectAtIndex:row]];
+		for (int i=0; i<[filterArr count]; i++) {
+			lblText=[[NSString stringWithFormat:@"%@%@,",lblText,[filterArr objectAtIndex:i]]retain];	
+		}
+		lblTypeLokaleText.text=@"";	
+		lblTypeLokaleText.text=lblText;
+	 }
+
+} 
+	
+	else if (thePickerView.tag==2) {
+		
+		if (row == -1)
+			for (id key in [selectionStates allKeys])
+				[selectionStates setObject:[NSNumber numberWithBool:YES] forKey:key];
+		else{
+			// NSLog(@"Fylk:::%@",arrFilterFlykeID);
+			[selectionStates setObject:[NSNumber numberWithBool:YES] forKey:[arrFlyke objectAtIndex:row]];
+			lblFlyke.text=[NSString	stringWithFormat:@"%@",[arrFlyke objectAtIndex:row]];
+			[arrFilterFlykeID addObject:[NSString stringWithFormat:@"%@",[arrFlykeId objectAtIndex:row]]];
+			appdel.aVar=[NSString	stringWithFormat:@"%@",[arrFlykeId objectAtIndex:row]];
+			appdel.strFylkeID =[NSString stringWithFormat:@"%@",[arrFlykeId objectAtIndex:row]];
+			
+			[filterArr1 addObject:[arrFlyke objectAtIndex:row]];
+			for (int i=0; i<[filterArr1 count]; i++) {
+				lblText1=[[NSString stringWithFormat:@"%@%@,",lblText1,[filterArr1 objectAtIndex:i]]retain];	
+			}
+			lblFlyke.text=@"";	
+			lblFlyke.text=lblText1;
+			
+			// NSLog(@"Fylk:::%@",appdel.strFylkeID);
+			
+			if (![lblFlyke.text isEqualToString:@"Alle flyker"]) {
+				
+				btnOmrade.userInteractionEnabled=TRUE;
+				btnOmrade.alpha =1;
+				lblOmradeTitle.alpha=1;
+				lblArea.alpha=1;
+				
+			}
+			if([lblFlyke.text isEqualToString:@"Alle flyker"]){
+				btnOmrade.userInteractionEnabled=FALSE;
+				btnOmrade.alpha =0.5;
+				lblOmradeTitle.alpha=0.5;
+				lblArea.alpha=0.5;
+			}
+			
+		}
+	}
+	
+	else if(thePickerView.tag==3){
+		if (row == -1)
+			for (id key in [selectionStates allKeys])
+				[selectionStates setObject:[NSNumber numberWithBool:YES] forKey:key];
+		else{
+			[selectionStates setObject:[NSNumber numberWithBool:YES] forKey:[arrArea objectAtIndex:row]];
+			lblArea.text=[NSString	stringWithFormat:@"%@",[arrArea objectAtIndex:row]];
+			appdel.strAreaID =[NSString	stringWithFormat:@"%@",[arrAreaID objectAtIndex:row]];	
+	
+        [arrFilterAreaID addObject:[NSString stringWithFormat:@"%@",[arrAreaID objectAtIndex:row]]];
+			[filterArr2 addObject:[arrArea objectAtIndex:row]];
+			
+            for (int i=0; i<[filterArr2 count]; i++) {
+				lblText2=[[NSString stringWithFormat:@"%@%@,",lblText2,[filterArr2 objectAtIndex:i]]retain];	
+			}
+			lblArea.text=@"";	
+			lblArea.text=lblText2;
+			
+			//NSLog(@"AREA:::%@",arrFilterAreaID);
+
+		}
+	}
+	else if(thePickerView.tag==4){
+		if (row == -1)
+			for (id key in [selectionStates allKeys])
+				[selectionStates setObject:[NSNumber numberWithBool:YES] forKey:key];
+		else{
+			[selectionStates setObject:[NSNumber numberWithBool:YES] forKey:[arrSize objectAtIndex:row]];
+			lblSize.text=[NSString	stringWithFormat:@"%@",[arrSize objectAtIndex:row]];
+			appdel.appdel_strSize=[NSString	stringWithFormat:@"%@",[arrSize objectAtIndex:row]];
+			[arrFilterSizeID addObject:[NSString stringWithFormat:@"%@",[arrSizeID objectAtIndex:row]]];
+			
+			[filterArr3 addObject:[arrSize objectAtIndex:row]];
+		
+			for (int i=0; i<[filterArr3 count]; i++) {
+				lblText3=[[NSString stringWithFormat:@"%@%@,",lblText3,[filterArr3 objectAtIndex:i]]retain];	
+			}
+			lblSize.text=@"";	
+			lblSize.text=lblText3;
+		}
+			// NSLog(@"Fylk:::%@",arrFilterSizeID);
+		}
+}
+
+- (void)pickerView:(ALPickerView *)thePickerView didUncheckRow:(NSInteger)row {
+	// Check whether all rows are unchecked or only one
+	lblRelease=@"";
+	lblRelease1=@"";
+	lblRelease2=@"";
+	lblRelease3=@"";
+	
+	if (thePickerView.tag==1){
+		
+	
+	if (row == -1)
+		for (id key in [selectionStates allKeys])
+			[selectionStates setObject:[NSNumber numberWithBool:NO] forKey:key];
+	else
+		[selectionStates setObject:[NSNumber numberWithBool:NO] forKey:[arrayTypeLokale objectAtIndex:row]];
+		//NSLog(@"row is::%d",row);
+		if (row ==-1) {
+			//NSLog(@"0");
+		}
+		else {
+			//[filterArr removeAllObjects];
+			[arrFilterLokalerID removeObject:[NSString stringWithFormat:@"%@",[arrTypeLokaleID objectAtIndex:row]]];	
+			[filterArr removeObject:[arrayTypeLokale objectAtIndex:row]];
+			for (int i=0; i<[filterArr count]; i++) {
+				lblRelease=[[NSString stringWithFormat:@"%@%@,",lblRelease,[filterArr objectAtIndex:i]]retain];	
+			}
+			
+			lblTypeLokaleText.text=@"";
+			lblTypeLokaleText.text=lblRelease;
+			//NSLog(filterArr);
+		}
+
+		
+		//NSLog(@"deselected:::%@",arrFilterLokalerID);
+	}
+	 else if (thePickerView.tag==2){
+		  
+		  
+		  if (row == -1)
+			  for (id key in [selectionStates allKeys])
+				  [selectionStates setObject:[NSNumber numberWithBool:NO] forKey:key];
+		  else
+			  [selectionStates setObject:[NSNumber numberWithBool:NO] forKey:[arrFlyke objectAtIndex:row]];
+		 if (row ==-1){   } 
+		 else{
+		[arrFilterFlykeID removeObject:[NSString stringWithFormat:@"%@",[arrFlykeId objectAtIndex:row]]];
+		 [filterArr1 removeObject:[arrFlyke objectAtIndex:row]];
+		 for (int i=0; i<[filterArr1 count]; i++) {
+			 lblRelease1=[[NSString stringWithFormat:@"%@%@,",lblRelease1,[filterArr1 objectAtIndex:i]]retain];	
+		 }
+		 
+		 
+		 lblFlyke.text=@"";
+		 lblFlyke.text=lblRelease1;
+		 }
+		 // NSLog(@"deselect::%@",arrFilterFlykeID);
+	 }
+		else if (thePickerView.tag==3){
+			  if (row == -1)
+				  for (id key in [selectionStates allKeys])
+					  [selectionStates setObject:[NSNumber numberWithBool:NO] forKey:key];
+			  else
+				  [selectionStates setObject:[NSNumber numberWithBool:NO] forKey:[arrArea objectAtIndex:row]];
+		if (row ==-1){  }
+		else{
+		[arrFilterAreaID removeObject:[NSString stringWithFormat:@"%@",[arrAreaID objectAtIndex:row]]];
+			[filterArr2 removeObject:[arrArea objectAtIndex:row]];
+			for (int i=0; i<[filterArr2 count]; i++) {
+				lblRelease2=[[NSString stringWithFormat:@"%@%@,",lblRelease2,[filterArr2 objectAtIndex:i]]retain];	
+			}
+						
+			lblArea.text=@"";
+			lblArea.text=lblRelease2;
+		}		
+			
+		}
+			//NSLog(@"deselect::%@",arrFilterAreaID);
+			   
+	else if (thePickerView.tag==4){
+			if (row == -1)
+			for (id key in [selectionStates allKeys])
+						   [selectionStates setObject:[NSNumber numberWithBool:NO] forKey:key];
+			  else
+				   [selectionStates setObject:[NSNumber numberWithBool:NO] forKey:[arrSize objectAtIndex:row]];
+		if (row ==-1){  }
+		else{
+		[arrFilterSizeID removeObject:[NSString stringWithFormat:@"%@",[arrSizeID objectAtIndex:row]]];
+			[filterArr3 removeObject:[arrSize objectAtIndex:row]];
+			for (int i=0; i<[filterArr3 count]; i++) {
+				lblRelease3=[[NSString stringWithFormat:@"%@%@,",lblRelease3,[filterArr3 objectAtIndex:i]]retain];	
+			}
+			
+			
+			lblSize.text=@"";
+			lblSize.text=lblRelease3;
+			}		
+		//NSLog(@"deselect::%@",arrFilterSizeID);
+		}
+	
+}
+
+- (UIView *)pickerView:(UIPickerView *)thePickerView viewForRow:(NSInteger)row forComponent:(NSInteger)component reusingView:(UIView *)view {
+
+	UIView *view1 =[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320,70)];
+	view1.backgroundColor =[UIColor clearColor];
+	
+//	btncheck = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+//	btncheck.userInteractionEnabled =TRUE;
+//	//[btncheck setTitle:@"Show View" forState:UIControlStateNormal];
+//	btncheck.frame = CGRectMake(0, 0, 320,20);
+//	[btncheck addTarget:thePickerView  action:@selector(btnCheckUncheck) forControlEvents:UIControlEventTouchDown];
+
+	//[view addSubview:button];
+	
+	
+//	UIButton *btncheck =[[UIButton alloc]  buttonWithType:UIButtonTypeRoundedRect];
+//	btncheck.frame =CGRectMake(0, 0, 320,70);
+//	
+//	//[btncheck setImage:[UIImage imageNamed:@"check.png"] forState:UIControlStateSelected];
+//	[btncheck addTarget:self action:@selector(btnCheckUncheck:)forControlEvents:UIControlEventTouchUpInside];
+//	
+	
+//	[btncheck setImage:[UIImage imageNamed:@"ButtonContact.png"] forState:UIControlStateNormal];
+	
+	
+	//NSString *tmp;
+	//NSArray *arrTmp;
+	NSDictionary *dic;
+	img1=[[UIImageView alloc]initWithFrame:CGRectMake(20, 0, 15,15)];
+	img1.image=[UIImage imageNamed:@"check.png"];
+
+	lbl = [[UILabel alloc] initWithFrame:CGRectMake(50, 0, 320,70)];
+	lbl.font=[UIFont boldSystemFontOfSize:11];
+	lbl.textAlignment= UITextAlignmentRight;
+	lbl.adjustsFontSizeToFitWidth = YES;
+		
+	if(thePickerView.tag==1){
+		//NSLog(@"%@",arrayTypeLokale);
+	//[arrPickerLokaler addObject:row];
+		for (int i=0; i< [arrayTypeLokale count];i++) {
+		
+		lbl.text=[arrayTypeLokale objectAtIndex:row];
+		
+	}
+		
+		if(row == rowId){
+			
+			//tmp=lbl.text;
+			
+			//NSLog(@"label text1:::%@",[dic valueForKey:@"text"]);
+			lbl.textColor = [UIColor orangeColor];
+			img1.hidden=NO;
+			btncheck.hidden =NO;
+		}
+		else{
+			lbl.textColor = [UIColor blackColor];
+			img1.hidden=YES;
+			btncheck.hidden =YES;
+		}
+	}
+	else if(thePickerView.tag==2){
+		
+		for (int i=0; i< [arrFlyke count];i++) {
+			lbl.text=[arrFlyke objectAtIndex:row];
+		}
+		if(row == rowId){
+			lbl.textColor = [UIColor orangeColor];
+			img1.hidden=NO;
+			btncheck.hidden =NO;
+		}
+		else{
+			lbl.textColor = [UIColor blackColor];
+			img1.hidden=YES;
+			btncheck.hidden =YES;
+
+		}	
+		//label.shadowColor = [UIColor whiteColor];
+		
+	}
+	else if(thePickerView.tag==3){
+			
+		for (int i=0; i< [arrArea count];i++) {
+			lbl.text=[arrArea objectAtIndex:row];
+		}
+		if(row == rowId){
+			lbl.textColor = [UIColor orangeColor];
+			img1.hidden =NO;
+			btncheck.hidden =NO;
+		}
+		else{
+			lbl.textColor = [UIColor blackColor];
+			img1.hidden =NO;
+			btncheck.hidden =YES;
+
+		}	
+		//label.shadowColor = [UIColor whiteColor];
+				
+	}
+	else if(thePickerView.tag==4){
+
+		for (int i=0; i< [arrSize count];i++) {
+			lbl.text=[arrSize objectAtIndex:row];
+		}
+	
+		if(row == rowId){
+			lbl.textColor = [UIColor orangeColor];
+			img1.hidden =NO;
+			btncheck.hidden =NO;
+		}
+		else{
+			lbl.textColor = [UIColor blackColor];
+			img1.hidden =YES;
+			btncheck.hidden =YES;
+
+		}	
+		//label.shadowColor = [UIColor whiteColor];
+		}
+	
+	[lbl sizeToFit];
+	[view1 addSubview:img1];
+	[view1 addSubview:lbl ];
+	//[view1 addSubview:btncheck];
+
+	return view1;
+}	
+
+#pragma mark -
+#pragma mark custom methods
+
+-(void)setToolBarFrames
+{
+	
+	[pickerView setFrame:CGRectMake(0, 470, 320, 216)];
+//[typeLokalePicker setFrame:CGRectMake(0, 470, 320, 216)];
+	[downPickerToolBar setFrame:CGRectMake(0, 514, 320, 44)];
+	[lblTypeLokale setFrame:CGRectMake(50, 519, 155, 21)];
+	[btnFerdig setFrame:CGRectMake(240, 514, 72, 33)];
+}
+
+-(void)presentPickerView:(NSInteger)btnTag
+{
+	downPickerToolBar.hidden=FALSE;
+	typeLokalePicker.hidden=FALSE;
+	btnFerdig.hidden=FALSE;
+	lblTypeLokale.hidden=FALSE;
+	[UIView beginAnimations:nil context:nil];
+	[UIView setAnimationDuration:0.5];
+	//[typeLokalePicker setFrame:CGRectMake(0, 244, 320, 216)];
+	typeLokalePicker.tag=btnTag;
+	//[typeLokalePicker reloadAllComponents];
+
+	[downPickerToolBar setFrame:CGRectMake(0, 200, 320, 44)];
+	[lblTypeLokale setFrame:CGRectMake(50, 212, 155, 21)];
+	[btnFerdig setFrame:CGRectMake(240, 208, 72, 33)];
+	[UIView commitAnimations];
+}
+
+-(void)clickBack{
+	
+	[self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void)clickTypeLokale{
+	//[btnFerdig setFrame:CGRectMake(240, 207, 72, 33)];	
+		[self GDATA];
+	btnLokale.userInteractionEnabled=FALSE;
+	btnFylke.userInteractionEnabled=FALSE;
+		btnFylke.alpha =0.3;
+		lblFlyke.alpha=0.3;
+	btnSize.userInteractionEnabled=FALSE;
+	btnSize.alpha =0.3;
+	lblSize.alpha =0.3;
+		
+	lblTypeLokale.text=@"Type Lokale";
+	lblTypeLokaleText.text=@"Alle Typer";
+
+}
+
+-(void)clickFylke{
+	[self GDATAFylke];
+	btnFylke.userInteractionEnabled=FALSE;
+	btnLokale.userInteractionEnabled=FALSE;
+	
+	btnLokale.alpha =0.3;
+	lblTypeLokaleText.alpha =0.3;
+		
+	btnSize.userInteractionEnabled=FALSE;
+	btnSize.alpha =0.3;
+	lblSize.alpha =0.3;
+	lblTypeLokale.text=@"Fylke";
+	lblFlyke.text=@"Alle flyker";
+}
+
+-(void)clickKommuneOmrade{
+	[self GDATAArea];
+	btnLokale.userInteractionEnabled=FALSE;
+	btnLokale.alpha =0.3;
+	lblTypeLokaleText.alpha =0.3;
+	
+	btnFylke.userInteractionEnabled=FALSE;
+	btnFylke.alpha =0.3;
+	lblFlyke.alpha=0.3;
+	
+	btnSize.userInteractionEnabled=FALSE;
+	btnSize.alpha =0.3;
+	lblSize.alpha =0.3;
+		
+	lblTypeLokale.text=@"Kommuner/Områder";
+	lblArea.text=@"Alle Kommuner/Områder";
+}
+
+-(void)clickStorrelse{
+	[self GDATASize];
+	
+	btnLokale.userInteractionEnabled=FALSE;
+	btnLokale.alpha =0.3;
+	lblTypeLokaleText.alpha =0.3;
+	
+	btnFylke.userInteractionEnabled=FALSE;
+	btnFylke.alpha =0.3;
+	lblFlyke.alpha=0.3;
+		
+	lblTypeLokale.text=@"Størrelser";
+	lblSize.text=@"Alle Størrelser";
+}
+
+-(void)clickNullStillAlleFilter{
+	
+	lblArea.text=@"Alle Kommuner/Områder";
+	lblSize.text=@"Alle Størrelser";
+	lblTypeLokaleText.text=@"Alle Typer";
+	lblFlyke.text=@"Alle flyker";
+ 
+	btnOmrade.userInteractionEnabled=FALSE;
+	btnOmrade.alpha =0.3;
+	lblArea.alpha=0.3;
+} 
+
+-(void)clickBruk{
+	
+    btnFylke.userInteractionEnabled=TRUE;
+	btnFylke.alpha =0.3;
+	lblFlyke.alpha=0.3;
+	
+	btnLokale.userInteractionEnabled=TRUE;
+	btnLokale.alpha =0.3;
+	lblTypeLokaleText.alpha =0.3;
+
+		btnOmrade.userInteractionEnabled=FALSE;
+		btnOmrade.alpha =0.3;
+		lblArea.alpha=0.3;
+	
+	btnSize.userInteractionEnabled=TRUE;
+	btnSize.alpha =0.3;
+	lblSize.alpha =0.3;
+	
+	[UIView beginAnimations:nil context:nil];
+	[UIView setAnimationDuration:0.5];
+	[self setToolBarFrames];
+	[UIView commitAnimations];
+	[viewAlert setFrame:CGRectMake(10, 140, 285, 185)];	
+}
+
+-(IBAction)clickFerdig{
+	btnFylke.userInteractionEnabled=TRUE;
+	btnFylke.alpha =1.0;
+	lblFlyke.alpha=1.0;
+		
+	btnLokale.userInteractionEnabled=TRUE;
+	btnLokale.alpha =1.0;
+	lblTypeLokaleText.alpha =1.0;
+		
+//	btnOmrade.userInteractionEnabled=TRUE;
+//	btnOmrade.alpha =1.0;
+//	lblOmradeTitle.alpha=1.0;
+//	lblArea.alpha=1.0;
+	
+	btnSize.userInteractionEnabled=TRUE;
+	btnSize.alpha =1.0;
+	lblSize.alpha =1.0;
+	
+	
+	//[lblTypeLokale setFrame:CGRectMake(50, 212, 155, 21)];
+	[UIView beginAnimations:nil context:nil];
+	[UIView setAnimationDuration:0.5];
+	[self setToolBarFrames];
+	//[pickerView removeFromSuperview];
+	[UIView commitAnimations];
+}
+-(void)GDATASaveNo{	
+	if([arrFilterLokalerID count]==0)
+		[arrFilterLokalerID  addObject:@""];
+    
+	NSString *lokalrIdString=[arrFilterLokalerID objectAtIndex:0];
+	
+	if([arrFilterFlykeID count]==0)
+		[arrFilterFlykeID  addObject:@""];		
+	NSString *flykeIdString=[arrFilterFlykeID objectAtIndex:0];
+	
+	if([arrFilterAreaID count]==0)
+		[arrFilterAreaID  addObject:@""];
+	NSString *areaIdString=[arrFilterAreaID objectAtIndex:0];
+	
+	if([arrFilterSizeID count]==0)
+		[arrFilterSizeID  addObject:@""];
+    
+	NSString *sizeIdString=[arrFilterSizeID objectAtIndex:0];
+	for(int i=1;i<[arrFilterLokalerID count];i++)
+	{ lokalrIdString=[NSString stringWithFormat:@"%@,%@",lokalrIdString,[arrFilterLokalerID objectAtIndex:i]];
+	}
+	for(int i=1;i<[arrFilterFlykeID count];i++)
+	{ flykeIdString=[NSString stringWithFormat:@"%@,%@",flykeIdString,[arrFilterFlykeID objectAtIndex:i]];
+	}
+	for(int i=1;i<[arrFilterAreaID count];i++)
+	{ areaIdString=[NSString stringWithFormat:@"%@,%@",areaIdString,[arrFilterAreaID objectAtIndex:i]];
+	}
+	for(int i=1;i<[arrFilterSizeID count];i++)
+	{ sizeIdString=[NSString stringWithFormat:@"%@,%@",sizeIdString,[arrFilterSizeID objectAtIndex:i]];
+	}
+
+	GdataParser *parserBack = [[GdataParser alloc] init];
+	//NSLog(@"Type Lokale::%@ , Fylke::%@, Area::%@, size::%@ ",appdel.strTypeLokaleID,appdel.strFylkeID,	appdel.strAreaID,appdel.strSizeID);
+	
+    	//NSLog(@"Type Lokale::%@ , Fylke::%@, Area::%@, size::%@ ",lokalrIdString,flykeIdString,	areaIdString,sizeIdString);
+    
+	[parserBack downloadAndParse:[NSURL URLWithString:[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=propertylist&deptid=%@&townid=%@&areaid=%@&sizerange=%@&sortby=",lokalrIdString,flykeIdString,areaIdString,sizeIdString]]
+					 withRootTag:@"post" 
+						withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"id",@"id",@"title",@"title",@"adress",@"adress",@"houseno",@"houseno",@"latitude",@"latitude",@"longitude",@"longitude",@"shortDescription",@"shortDescription",@"mainimage",@"mainimage",@"areaname",@"areaname",@"townname",@"townname",@"fromarea",@"fromarea",@"toarea",@"toarea",@"departmentname",@"departmentname",nil]
+							 sel:@selector(finishGetDataSaveNo:) 
+					  andHandler:self];
+}
+
+-(void)finishGetDataSaveNo:(NSDictionary*)dictionary{
+	//NSLog(@"This is dictionary: %@",dictionary);
+	
+	[appdel.appdel_ArrayFilterBack removeAllObjects];
+	
+	appdel.appdel_ArrayFilterBack =[dictionary valueForKey:@"array"] ;
+	appdel.appdel_dicFilterBack  =[dictionary valueForKey:@"array"] ;
+	appdel.currentArray=appdel.appdel_ArrayFilterBack;
+	
+	[arrLat removeAllObjects];
+	[arrLong removeAllObjects];
+	[appdel.distance removeAllObjects];
+	
+	arrLat=[[appdel.appdel_ArrayFilterBack valueForKey:@"latitude"]retain];
+	arrLong=[[appdel.appdel_ArrayFilterBack valueForKey:@"longitude"]retain];
+	for(int i=0;i<[arrLat count];i++)
+	{
+		
+		NSString *strlat;
+		NSString *strlong;
+		strlat=[arrLat objectAtIndex:i];
+		strlong=[arrLong objectAtIndex:i];
+		CLLocation *poiLoc = [[CLLocation alloc] initWithLatitude: [strlat doubleValue] longitude: [strlong doubleValue]];
+		
+		CLLocation *userLoc = [[CLLocation alloc] initWithLatitude:appdel.lat longitude:appdel.lon];
+		
+		double dist1 = [userLoc getDistanceFrom:poiLoc];
+		NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+		[formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+		[formatter setMaximumFractionDigits:2];
+		[formatter setRoundingMode: NSNumberFormatterRoundHalfUp];
+		
+		NSString *numberString = [formatter stringFromNumber:[NSNumber numberWithFloat:dist1]];
+		
+		[formatter release];
+		//NSLog(@"%@",numberString);
+		
+		if(dist1<999)
+			[appdel.distance addObject:[NSString stringWithFormat:@"%@ meter",numberString]];
+		else{
+			
+			float temp;
+			temp=dist1/1000;
+			[appdel.distance addObject:[NSString stringWithFormat:@"%@ KM",numberString]];
+			
+		}
+		//double dist = 
+		//[self getDistance:appdel.lat:appdel.lon:[strlat doubleValue]:[strlong doubleValue]];
+		
+	}
+	
+	[self.navigationController popViewControllerAnimated:YES];
+}
+
+-(void)GDATAYes{
+	if([arrFilterLokalerID count]==0)
+		[arrFilterLokalerID  addObject:@""];
+
+	NSString *lokalrIdString=[arrFilterLokalerID objectAtIndex:0];
+	
+	if([arrFilterFlykeID count]==0)
+		[arrFilterFlykeID  addObject:@""];		
+	NSString *flykeIdString=[arrFilterFlykeID objectAtIndex:0];
+	
+	if([arrFilterAreaID count]==0)
+		[arrFilterAreaID  addObject:@""];
+	NSString *areaIdString=[arrFilterAreaID objectAtIndex:0];
+	
+	if([arrFilterSizeID count]==0)
+		[arrFilterSizeID  addObject:@""];
+
+	NSString *sizeIdString=[arrFilterSizeID objectAtIndex:0];
+	for(int i=1;i<[arrFilterLokalerID count];i++)
+	{ lokalrIdString=[NSString stringWithFormat:@"%@,%@",lokalrIdString,[arrFilterLokalerID objectAtIndex:i]];
+	}
+	for(int i=1;i<[arrFilterFlykeID count];i++)
+	{ flykeIdString=[NSString stringWithFormat:@"%@,%@",flykeIdString,[arrFilterFlykeID objectAtIndex:i]];
+	}
+	for(int i=1;i<[arrFilterAreaID count];i++)
+	{ areaIdString=[NSString stringWithFormat:@"%@,%@",areaIdString,[arrFilterAreaID objectAtIndex:i]];
+	}
+	for(int i=1;i<[arrFilterSizeID count];i++)
+	{ sizeIdString=[NSString stringWithFormat:@"%@,%@",sizeIdString,[arrFilterSizeID objectAtIndex:i]];
+	}
+	
+//	NSLog(lokalrIdString);
+//	NSLog(flykeIdString);
+//	NSLog(areaIdString);
+//	NSLog(sizeIdString);
+//	NSLog(@"UDID:::%@",appdel.udID);
+//  NSLog(@"IDDDDD:::::::%@",arrFilterLokalerID);
+	
+	GdataParser *parserSave = [[GdataParser alloc] init];	
+	//NSLog(@"Type Lokale::%@ , Fylke::%@, Area::%@, size::%@, uid::%@,",appdel.strTypeLokaleID,appdel.strFylkeID,appdel.strAreaID,appdel.strSizeID,appdel.udID);
+	NSString *urlstr123 =[NSString stringWithFormat:@"http://www.estatelokaler.no/appservice.php?token=savesearch&town_id=%@&area_id=%@&department_id=%@&from_area=%@&to_area=%@&udid=%@",flykeIdString,areaIdString,lokalrIdString,[arrSplitSize objectAtIndex:0],[arrSplitSize objectAtIndex:1],appdel.udID];
+	NSURL *url = [NSURL URLWithString:[urlstr123 stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding]];
+	[parserSave downloadAndParse:url
+				 withRootTag:@"savesearch" 
+					withTags:[NSDictionary dictionaryWithObjectsAndKeys:@"savesearch",@"savesearch",nil]
+						 sel:@selector(finishGetDataYes:) 
+				  andHandler:self];
+}
+
+-(void)finishGetDataYes:(NSDictionary*)dictionary{
+	//NSLog(@"This is dictionary: %@",dictionary);
+
+	//[appdel.appdel_ArrayFilterSave removeAllObjects];
+	appdel.appdel_ArrayFilterSave =[dictionary valueForKey:@"array"];
+	appdel.appdel_dicFilterSave=[dictionary valueForKey:@"array"];
+	appdel.currentArray=appdel.appdel_ArrayFilterSave;
+   
+	[self GDATASaveNo];
+}
+
+-(void)clickYes{
+	//if(appdel.buttonClick==1)
+	//{
+	// NSLog(@"IDDDDD:::::::%@",arrFilterLokalerID);
+	
+	[viewAlert setFrame:CGRectMake(19, 470, 285, 185)];
+	appdel.flagFilter=2;
+    //NSLog(appdel.appdel_strSize);
+	if(![appdel.appdel_strSize isEqualToString:@"Alle St\u00f8rrelser"])
+		 
+	arrSplitSize=[appdel.appdel_strSize componentsSeparatedByString:@"-"];
+	//[arrFilterSizeID componentsSeparatedByString:@","];
+	//	NSLog()
+	if([arrSplitSize count]<2){
+	[arrSplitSize addObject:@""];
+
+	[arrSplitSize addObject:@""];
+	}
+	//NSLog(@" Split Array:::%@",arrSplitSize);
+	[self GDATAYes];
+	
+	//}
+}
+
+-(void)clickNo{
+	
+	[viewAlert setFrame:CGRectMake(19, 470, 285, 185)];	
+	appdel.flagFilter=1;
+	[self GDATASaveNo];	
+}
+
+- (void)didReceiveMemoryWarning {
+    // Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+	// Release any cached data, images, etc. that aren't in use.
+}
+
+- (void)viewDidUnload {
+    [super viewDidUnload];
+    // Release any retained subviews of the main view.
+    // e.g. self.myOutlet = nil;
+}
+
+- (void)dealloc {
+	[super dealloc];
+	[lbl release];
+	if (arrayTypeLokale!=nil) {
+		arrayTypeLokale=nil;
+		[arrayTypeLokale release];
+	}
+	if (arrayDisplay!=nil) {
+		arrayDisplay=nil;
+		[arrayDisplay release];
+	}
+	if (arrArea!=nil) {
+		arrArea=nil;
+		[arrArea release];
+	}
+	if (arrFlyke!=nil) {
+		arrFlyke=nil;
+		[arrFlyke release];
+	}
+	if (arrSize!=nil) {
+		arrSize=nil;
+		[arrSize release];
+	}
+	if (arrFlykeId!=nil) {
+		arrFlykeId=nil;
+		[arrFlykeId release];
+	}
+	if (arrAreaID!=nil) {
+		arrAreaID=nil;
+		[arrAreaID release];
+	}
+	if (arrSizeID!=nil) {
+		arrSizeID=nil;
+		[arrSizeID release];
+	}
+	if (strTypeLokaleID!=nil) {
+		strTypeLokaleID=nil;
+		[strTypeLokaleID release];
+	}
+	if (strFylkeID!=nil) {
+		strFylkeID=nil;
+		[strFylkeID release];
+	}
+	if (strAreaID!=nil) {
+		strAreaID=nil;
+		[strAreaID release];
+	}
+	if (strSizeID!=nil) {
+		strSizeID=nil;
+		[strSizeID release];
+	}
+	
+	//[lokaleDisplay release];
+	[arrayCountLokale release];
+	[arrFilterLokalerID release];
+	[arrFilterFlykeID release];
+	[arrFilterAreaID release];
+	[arrFilterSizeID release];
+	[selectionStates release];
+	[arrLat release];
+	[arrLong release];
+	//[distance release];
+	[typeLokalePicker release];
+	[downPickerToolBar release];
+	[lblTypeLokale release];
+	[lblTypeLokaleText release];
+	[lblFlyke release]; 
+	[lblArea release];
+	[lblSize release];
+	[lblOmradeTitle release];
+	[viewAlert release];
+	
+}
+
+@end

@@ -1,0 +1,108 @@
+//
+//  MineSokVC1.h
+//  EstateLokaler
+//
+//  Created by apple  on 9/29/11.
+//  Copyright 2011 hjbvb. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+@class GdataParser;
+@class EstateLokalerAppDelegate;
+@class MineSokCell;
+@class MineFunnCell;
+@class SokeFilterVC;
+@class PropertyListMode;
+@class PropertiesDetailVC;
+@class MineFunnVC;
+@interface MineSokVC : UIViewController<UITableViewDelegate,UITableViewDataSource> {
+	EstateLokalerAppDelegate *appdel;
+	SokeFilterVC *filterobj;
+	NSMutableDictionary *_dict;
+	NSMutableDictionary *dictTown;
+	NSMutableDictionary *dictArea;
+	NSMutableDictionary *dictDept;
+	NSMutableDictionary *dictExtra;
+	NSMutableDictionary *dictCntProp;
+	NSMutableDictionary *_dictCNT;
+	
+	IBOutlet UITableView *myTable;
+	MineFunnVC *detailViewController;
+		
+	NSString *strTempDelID;
+	NSMutableArray *arrAppTownID;
+	NSMutableArray *arrAppAreaID;
+	NSMutableArray *arrTown;	
+	NSMutableArray *arrAreaName;
+	NSMutableArray *arrTownName;
+	NSMutableArray *arrSplitArea;
+	NSMutableArray *arrDeptName;
+	NSMutableArray *arrSplitDept;
+	NSMutableArray *arrSearchId;
+	NSMutableArray *arrCntProp;
+	NSMutableArray *arrSplitTown;
+	NSMutableArray *arrAppDeptID;
+	NSMutableArray *arr;
+	
+	NSString *mix;
+	NSString *mix1;
+	
+	NSString *strCntProp;
+	NSString *strTempCntPro;
+	NSString *strTempDept;
+	NSString *strTempTown;
+	NSString *strTempArea;
+
+	int cntTown;
+	int cntArea;
+	int cntDept;
+	int count1;
+	int tempComplete;
+
+	
+}
+
+//@property(nonatomic,retain) NSMutableDictionary *_dict;
+//@property(nonatomic,retain) NSMutableDictionary *dictTown;
+//@property(nonatomic,retain) NSMutableDictionary *dictArea;
+//@property(nonatomic,retain) NSMutableDictionary *dictDept;
+//@property(nonatomic,retain) NSMutableDictionary *dictExtra;
+//@property(nonatomic,retain) NSMutableDictionary *dictCntProp;
+//
+//@property(nonatomic,retain) NSString *strTempDept;
+//@property(nonatomic,retain) NSString *strTempTown;
+//@property(nonatomic,retain) NSString *strTempArea;
+//@property(nonatomic,retain) NSMutableArray *arrAppTownID;
+//@property(nonatomic,retain) NSMutableArray *arrAppDepID;
+//@property(nonatomic,retain) NSMutableArray *arrAppAreaID;
+//@property(nonatomic,retain) NSMutableArray *arrTown;	
+//@property(nonatomic,retain) NSMutableArray *arrAreaName;
+//@property(nonatomic,retain) NSMutableArray *arrTownName;
+//@property(nonatomic,retain) NSMutableArray *arrSplitArea;
+//@property(nonatomic,retain) NSMutableArray *arrDeptName;
+//@property(nonatomic,retain) NSMutableArray *arrSplitDept;
+//@property(nonatomic,retain) NSMutableArray *arrSearchId;
+//@property(nonatomic,retain) NSMutableArray *arrCntProp;
+//@property(nonatomic,retain) NSMutableArray *arrSplitTown;
+//@property(nonatomic,retain) NSMutableArray *arrAppDeptID;
+
+
+
+-(IBAction)clickBack;
+-(IBAction)sokDelete;
+
+-(void)GDATA;
+
+-(void)GDATATown;
+-(void)GDATAArea;
+-(void)getTownName;
+-(void)getAreaName;
+-(void)getDeptName;
+
+-(void)GDATADept;
+-(void)GDATADelete;
+
+-(void)GDATACntProp;
+@end
+
+	

@@ -1,0 +1,59 @@
+//
+//  MineFunnCell.m
+//  EstateLokaler
+//
+//  Created by apple on 9/7/11.
+//  Copyright 2011 __MyCompanyName__. All rights reserved.
+//
+
+#import "MineFunnCell.h"
+#import "MineFunnVC.h"
+#import "EstateLokalerAppDelegate.h"
+
+@implementation MineFunnCell
+@synthesize imgView,lblAvstand;
+
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    
+    self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
+    if (self) {
+        // Initialization code.
+    }
+    return self;
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+    
+    [super setSelected:selected animated:animated];
+    
+    // Configure the view for the selected state.
+}
+
+-(void)setData:(NSMutableDictionary*)dt{
+	
+	
+	strFromTo=[NSString stringWithFormat:@"%@-%@ kvm", [dt valueForKey:@"fromarea"],[dt valueForKey:@"toarea"]];
+	lblToFrom.text=strFromTo;
+	strAreaTown=[NSString stringWithFormat:@"%@,%@", [dt valueForKey:@"townname"],[dt valueForKey:@"areaname"]];
+	lblAreaTown.text=strAreaTown;
+	imgView.frame= CGRectMake(4,7,87,82);
+
+	strTitle=[NSString stringWithFormat:@"%@, %@",[dt valueForKey:@"adress"],[dt valueForKey:@"houseno"] ];
+	lblTitle.text=strTitle;
+	
+}	
+
+
+- (void)dealloc {
+    [super dealloc];
+	[lblTitle release];
+	[lblToFrom release];
+	[lblAreaTown release];
+	[lblAvstand release];
+	[imgView release];
+}
+
+
+
+@end
